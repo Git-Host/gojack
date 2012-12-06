@@ -1,0 +1,6 @@
+V 2.0
+eliminazione carattere " " con ""
+salvataggio dell'ultimo servizio usato in ogni conversazione
+correzione di bug riguardanti il wifi e il modulo 3g su versioni di android >=4
+implementazione grazie al software SmsDroid delle conversazioni
+eliminate la sezione "generali" delle impostazioni
