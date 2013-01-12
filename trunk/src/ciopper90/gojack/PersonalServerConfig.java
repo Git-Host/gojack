@@ -30,7 +30,9 @@ public class PersonalServerConfig extends Activity{
 
 			public void onClick(View arg0) {
 				SharedPreferences.Editor editor = prefs.edit();
-				editor.putString("url", url.getText().toString());
+				String server=url.getText().toString();
+				server=server.replaceAll(" ", "");
+				editor.putString("url", server);
                 editor.commit();	
                 Toast.makeText(getApplicationContext(), "Salvato url predefinita", Toast.LENGTH_SHORT).show();
                 finish();

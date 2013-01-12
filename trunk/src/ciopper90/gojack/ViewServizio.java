@@ -502,7 +502,6 @@ public class ViewServizio extends Activity{
 						String[] conf=new String[4];
 						for(int k=0;k<conf.length;k++)
 							conf[k]="";
-
 						switch(count){
 						case 1:db.insertParameterService(nameservice,parametri[1],null,null,null,url);
 						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
