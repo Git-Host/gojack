@@ -50,7 +50,7 @@ public class AddScript extends Activity{
 		name=(EditText)findViewById(R.id.namesc);
 		url=(EditText)findViewById(R.id.urlsc);
 		url.setText(textData);
-		config=new String[2];
+		config=new String[3];
 
 		Button salva=(Button)findViewById(R.id.Salvasc);
 		salva.setOnClickListener(new Button.OnClickListener(){
@@ -60,6 +60,11 @@ public class AddScript extends Activity{
 				//per capire come va configurato il servizio
 				config[1]=url.getText().toString().replace(" ", "");
 				config[0]=name.getText().toString();
+				if(config[1].indexOf("&", config[1].indexOf("servizio"))!=-1){
+					config[2]=(String) url.getText().toString().subSequence(config[1].indexOf("servizio=")+9, config[1].indexOf("&", config[1].indexOf("servizio=")));
+				}else{
+					config[2]=(String) url.getText().toString().subSequence(config[1].indexOf("servizio=")+9, config[1].length());	
+				}
 				HttpClient httpclient = new DefaultHttpClient();
 				HttpPost httppost;
 				if(config[1].contains("?servizio="))

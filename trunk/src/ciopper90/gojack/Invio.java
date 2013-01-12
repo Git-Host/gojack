@@ -19,6 +19,10 @@ import org.apache.http.util.EntityUtils;
 
 import ciopper90.gojack.utility.Servizio;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.EditText;
 
@@ -85,7 +89,7 @@ public class Invio {
 		return null;
 		//return "Download non riuscito";
 	}
-	public String InvioSms(Servizio s,EditText number,EditText testo) {
+	public String InvioSms(Servizio s,EditText number,EditText testo,Context context) {
 		// Create a new HttpClient and Post Header
 		String url=s.getUrl();
 		//url.replaceAll(, substitute)
@@ -101,9 +105,42 @@ public class Invio {
 			String terzo=new String(s.getTerzo());
 			@SuppressWarnings("unused")
 			String quarto=new String(s.getQuarto());
+			String servizio=new String(s.getServizio());
 
+			String body=testo.getText().toString();
+			String to;
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+			if(servizio.equalsIgnoreCase("GoJackMS")){
+				to=number.getText().toString();
+				int fine=to.indexOf("<");
+				to=to.substring(0,fine);
+				
+				
+				
+				// Get Instant Messenger.........
+				ContentResolver cr = context.getContentResolver();
+				String imWhere = ContactsContract.Data.DISPLAY_NAME + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+                String[] imWhereParams = new String[]{to,
+                    ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE};
+                Cursor imCur = cr.query(ContactsContract.Data.CONTENT_URI,
+                        null, imWhere, imWhereParams, null);
+                String web="";
+                if (imCur.moveToFirst()) {
+                    web = imCur.getString(
+                             imCur.getColumnIndex(ContactsContract.CommonDataKinds.Website.URL));
+                }
+                imCur.close();
+                if(web!=""){
+                	nameValuePairs.add(new BasicNameValuePair("rcpt", web));
+                	nameValuePairs.add(new BasicNameValuePair("lang", "it"));
+                	nameValuePairs.add(new BasicNameValuePair("text", body));
+                }else{
+                	return "<res><num>2</num><txt>manca numero interno di gojack</txt></res>";
+                }
+                	
+			}else{
 			//estraggo numero :D
-			String to=number.getText().toString();
+			to=number.getText().toString();
 			int inizio=to.indexOf("<");
 			if(inizio!=-1){
 				to=to.substring(inizio+1, to.length()-1);
@@ -116,32 +153,18 @@ public class Invio {
 				}
 
 			}
-
-			//estraggo testo
-			String body=testo.getText().toString();
-
-			//		body=body.replace(" ", "%20");
-			//		body=body.replace("?", "%3F");
-
-
-
-			//body=URLEncoder.encode(body);
-
-			//String param = URLEncoder.encode("Hermann-Löns", "CP1252");
-			//body=Uri.encode(body);
-			//RFC 2396.
-			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-			nameValuePairs.add(new BasicNameValuePair("user", primo));
-			nameValuePairs.add(new BasicNameValuePair("pass", secondo));
-			nameValuePairs.add(new BasicNameValuePair("nick", terzo));//+"$$"+quarto));
-			nameValuePairs.add(new BasicNameValuePair("rcpt", to));
-			nameValuePairs.add(new BasicNameValuePair("lang", "it"));
-			nameValuePairs.add(new BasicNameValuePair("text", body));
+				nameValuePairs.add(new BasicNameValuePair("user", primo));
+				nameValuePairs.add(new BasicNameValuePair("pass", secondo));
+				nameValuePairs.add(new BasicNameValuePair("nick", terzo));//+"$$"+quarto));
+				nameValuePairs.add(new BasicNameValuePair("rcpt", to));
+				nameValuePairs.add(new BasicNameValuePair("lang", "it"));
+				nameValuePairs.add(new BasicNameValuePair("text", body));
+			}
 			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
 
 			HttpResponse response = httpclient.execute(httppost);
 			String returnString=EntityUtils.toString(response.getEntity());
+			returnString.concat("");
 			return returnString;
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block

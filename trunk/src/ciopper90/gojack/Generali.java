@@ -45,7 +45,7 @@ public class Generali extends Activity{
 		else
 			d.setChecked(false);
 
-		c.setOnClickListener(new Button.OnClickListener(){
+		d.setOnClickListener(new Button.OnClickListener(){
 			public void onClick(View arg0) {
 				SharedPreferences.Editor editor = prefs.edit();
 				if(d.isChecked())

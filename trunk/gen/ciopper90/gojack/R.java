@@ -99,6 +99,7 @@ public final class R {
         public static final int generali=0x7f040011;
         public static final int imp3g=0x7f04000a;
         public static final int lastnum=0x7f04000f;
+        public static final int reciver=0x7f040018;
         public static final int script=0x7f040013;
         public static final int serverpersonale=0x7f040002;
         public static final int serverpersonaleupdate=0x7f040003;

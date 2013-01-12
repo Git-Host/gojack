@@ -2,12 +2,12 @@ package ciopper90.gojack.utility;
 
 
 public class Servizio{
-	private String dati[];//nome,url,primo,secondo,terzo,quarto
+	private String dati[];//nome,url,servizio,primo,secondo,terzo,quarto
 	@SuppressWarnings("unused")
 	private int rimanenti;
 	private String id;
  
-	public Servizio(String name, String primo, String secondo,String terzo,String quarto,String url,String firma,String id) {
+	public Servizio(String name,String servizio, String primo, String secondo,String terzo,String quarto,String url,String firma,String id) {
 		super();
 		dati=new String[8];
 		dati[0]=name;
@@ -17,6 +17,7 @@ public class Servizio{
 		dati[4]=terzo;
 		dati[5]=quarto;
 		dati[6]=firma;
+		dati[7]=servizio;
 		this.id=id;
 	}
 	public String getName(){
@@ -45,6 +46,9 @@ public class Servizio{
 	}
 	public String getId() {
 		return id;
+	}
+	public String getServizio() {
+		return dati[7];
 	}
 	
 	

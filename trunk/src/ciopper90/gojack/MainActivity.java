@@ -1,9 +1,13 @@
 package ciopper90.gojack;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.zip.GZIPInputStream;
 
 import ciopper90.gojack.utility.DatabaseRubrica;
 import ciopper90.gojack.utility.DatabaseService;
@@ -13,6 +17,7 @@ import ciopper90.gojack.work.WorkSms;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -20,6 +25,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -47,18 +53,21 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.BaseColumns;
+import android.provider.CallLog.Calls;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 
 @SuppressLint("HandlerLeak")
-public class MainActivity extends Activity implements TextWatcher, OnItemSelectedListener{
+public class MainActivity extends Activity implements TextWatcher, OnItemSelectedListener, OnMenuItemClickListener{
 
 	final static int RQS_PICK_CONTACT = 0;
 
@@ -91,6 +100,9 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 	private int numchar;
 	private TextView tw;
 	private SharedPreferences prefs;
+	private String password;
+
+
 
 
 
@@ -148,7 +160,8 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		number.setAdapter(adapter);	
 		context=this.getApplicationContext();
 		db=new DatabaseService(context);
-		invio=new Invio();
+		if(invio==null)
+			invio=new Invio();
 		wsms=new WorkSms();
 
 		testo=(EditText)findViewById(R.id.testo);
@@ -281,6 +294,46 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		tw.setText("0/"+numchar);
 		registerForContextMenu(testo);
 		registerForContextMenu(number);
+
+		showRows(this.getApplicationContext(), Uri.parse("content://sms/"));
+
+	}
+
+
+
+	private String TAG= "ciao";
+	void showRows(final Context context, final Uri u) {
+		Uri mSmsQueryUri = Uri.parse("content://sms/");
+		String columns[] = new String[] {"person", "address", "body", "date","status"};
+		String sortOrder = "date ASC";
+
+		ContentResolver mContentResolver = context.getContentResolver();
+		// Run query and check the result
+		try {
+			cursor = mContentResolver.query(mSmsQueryUri, null, null, null, sortOrder);
+			Log.i("message", "yep" + "# elementi di cursor: " + cursor.getCount() );
+
+			cursor.moveToFirst();
+			while( cursor != null && cursor.isAfterLast() == false )
+			{       
+				int i=0;
+				String c="",d="";
+				for(int h=0;h<cursor.getColumnCount();h++){
+					c=c+cursor.getColumnName(i)+" | ";
+					d=d+cursor.getString(i)+" | ";
+					i++;
+				}
+				cursor.moveToNext();
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			//   Log.i(LOG, LOG_PREFIX + "Exception:" + e.getMessage());
+		} finally {
+			cursor.close();
+		}
+
 	}
 
 	protected boolean Controlla() {
@@ -306,7 +359,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 				ContentResolver cr = getContentResolver();
 				id = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID));
 				numero = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.HAS_PHONE_NUMBER));
-
 				if (Integer.parseInt(cursor.getString(
 						cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
 					Cursor pCur = cr.query(
@@ -388,7 +440,7 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 			public void run() {
 				try{
 					//	invio=new Invio();
-					prova=invio.InvioSms(s,number, testo);
+					prova=invio.InvioSms(s,number, testo,context);
 					if(!prova.contains("<res>")&&!prova.contains("<html>")&&!prova.contains("errore")){
 						FileOutputStream out = openFileOutput("captcha.jpg", Context.MODE_PRIVATE);
 						for(int i=0;i<prova.length();i++)
@@ -458,7 +510,11 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 				e.printStackTrace();
 			}
 			text=(EditText) layout.findViewById(R.id.text);
-			bMap= Bitmap.createScaledBitmap(bMap, 300, 80, true);
+			DisplayMetrics metrics = new DisplayMetrics();
+			getWindowManager().getDefaultDisplay().getMetrics( metrics);
+			Log.d("misure","image "+bMap.getHeight()+":"+bMap.getWidth()+" spazio "+image.getHeight()+" "+image.getWidth());
+			double rapporto=bMap.getWidth()/(double)bMap.getHeight();
+			bMap= Bitmap.createScaledBitmap(bMap,(int)(metrics.widthPixels*0.9), (int)(((int)(metrics.widthPixels*0.9))/ rapporto), true);
 			image.setImageBitmap(bMap);
 			builder = new AlertDialog.Builder(MainActivity.this);
 			builder.setView(layout);
@@ -805,7 +861,247 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		int GROUPB = 1;
 		menu.add(GROUPB,order,order++,getResources().getString(R.string.sms_label)).setIntent(new Intent(MainActivity.this,ViewSms.class)).setIcon(android.R.drawable.ic_menu_view);
 		menu.add(GROUPA,order,order++,getResources().getString(R.string.setting)).setIntent(new Intent(MainActivity.this,Setting.class)).setIcon(android.R.drawable.ic_menu_preferences);
+		menu.add(GROUPA,order,order++,getResources().getString(R.string.reciver)).setOnMenuItemClickListener(this).setIcon(R.drawable.ic_menu_download);
 		menu.add(GROUPA,order,order++,getResources().getString(R.string.about_label)).setIntent(new Intent(MainActivity.this,About.class)).setIcon(android.R.drawable.ic_menu_info_details);
 		return true;
 	}
+	
+	private class DownTask extends AsyncTask<String,String,String>  {
+
+		private String text;
+
+		@Override
+		protected String doInBackground(String... params) {
+			text=params[0];
+			// result = null;
+
+			// interrogazione del web service
+
+			// aggiorno la progress dialog
+			publishProgress("Download");
+			InputStream is = null ;
+			try {
+				byte[] a=Invio.scarica(text);
+				publishProgress("Extract");	
+				if(a!=null){
+					is = new ByteArrayInputStream(a);
+					GZIPInputStream ginstream;
+
+					ginstream = new GZIPInputStream(is);
+					String c="";
+					int len;
+
+					while ((len = ginstream.read()) != -1) 
+					{
+						c=c.concat(""+(char)len);
+					}
+					len=0;
+					publishProgress("Import");
+					int res=parseMS(c);
+					//this.aggiornalist();
+					if(res==0)
+						return "Scaricati "+res+" GoJackMS";
+					else
+						if(res==-1)
+							return "Errore File GoJack.php";
+						else{
+							return "Nessun Nuovo GoJackMS";
+						}
+					//Toast.makeText(getApplicationContext(), "Servizi Inseriti Correttamente", Toast.LENGTH_LONG).show();
+				}else{
+					return "Errore Rete";
+					//Toast.makeText(getApplicationContext(), "Errore Rete", Toast.LENGTH_LONG).show();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				try {
+				int len=0;
+				String d="";
+					while ((len = is.read()) != -1) 
+					{
+						d=d.concat(""+(char)len);
+					}
+					return d.substring(d.indexOf("<txt>")+5,d.indexOf("/txt")-1);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+			return "Errore Generico";
+		}
+		
+
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			// aggiorno la progress dialog
+			pd.setMessage(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			// chiudo la progress dialog
+			pd.dismiss();
+
+			//operazioni di chiusura
+			//not(result);
+
+		}
+
+
+		private int parseMS(String c) {
+			Log.d("SMS", c);
+			String[] s=c.split("<msg ");
+			/*for(int n=1;n<s.length;n++){
+				//richiesta parametri x service
+				//HttpClient httpclient = new DefaultHttpClient();
+				int primo=s[n].indexOf("service=\"")+9;
+				int secondo=s[n].indexOf("\"", primo);
+				String name=s[n].substring(primo,secondo);
+				primo=s[n].indexOf("name=\"")+6;
+				secondo=s[n].indexOf("\"", primo);
+				String nameservice=s[n].substring(primo,secondo);
+				String url=text+name+password;
+				//response = httpclient.execute(httppost);
+				String returnString=null;
+				try{
+					returnString=s[n].substring(s[n].indexOf("<res>"),s[n].indexOf("/res")+5);
+				}catch(Exception e){
+					return 1;
+				}
+				if(returnString.indexOf("<config>")!=-1){
+					if(returnString.indexOf("<res>")!=-1){
+						//elaborare returnString per poi salvare il dato nel database
+						dati=new String[6];
+						dati[0]=(String) returnString.subSequence(returnString.indexOf("<nu>")+4, returnString.indexOf("</nu>"));
+						dati[1]=(String) returnString.subSequence(returnString.indexOf("<np>")+4, returnString.indexOf("</np>"));
+						dati[2]=(String) returnString.subSequence(returnString.indexOf("<nn>")+4, returnString.indexOf("</nn>"));
+						dati[3]="0";//returnString.subSequence(returnString.indexOf("<nu>"+4), returnString.indexOf("</nu>"));
+						dati[4]=(String) returnString.subSequence(returnString.indexOf("<mc>")+4, returnString.indexOf("</mc>"));
+						if(returnString.indexOf("<mm>")!=-1)
+							dati[5]=(String) returnString.subSequence(returnString.indexOf("<mm>")+4, returnString.indexOf("</mm>"));
+						else
+							dati[5]=(String) returnString.subSequence(returnString.indexOf("<mmm>")+5, returnString.indexOf("</mmm>"));	
+						db.insertDataService(nameservice, Integer.parseInt(dati[0]), Integer.parseInt(dati[1]), Integer.parseInt(dati[2]),Integer.parseInt(dati[3]), Integer.parseInt(dati[4]), Integer.parseInt(dati[5]), url);
+						int count=0;
+						for(int i=0;i<4;i++){
+							if(dati[i].equals("1")||dati[i].equals("2"))
+								count++;
+						}
+						parametri=new String[5];
+						if(returnString.indexOf("<n1>")!=-1){
+							switch(count){
+							case 4:parametri[4]=(String) returnString.subSequence(returnString.indexOf("<n4>")+4, returnString.indexOf("</n4>"));
+							case 3:parametri[3]=(String) returnString.subSequence(returnString.indexOf("<n3>")+4, returnString.indexOf("</n3>"));
+							case 2:parametri[2]=(String) returnString.subSequence(returnString.indexOf("<n2>")+4, returnString.indexOf("</n2>"));
+							case 1:parametri[1]=(String) returnString.subSequence(returnString.indexOf("<n1>")+4, returnString.indexOf("</n1>"));
+							parametri[0]="Nome Servizio";
+							}
+						}else{
+							parametri[0]="Nome Servizio";
+							parametri[1]="Username:";
+							parametri[2]="Password";
+							parametri[3]="Nick";		
+						}
+						String[] conf=new String[4];
+						for(int k=0;k<conf.length;k++)
+							conf[k]="";
+
+						switch(count){
+						case 1:db.insertParameterService(nameservice,parametri[1],null,null,null,url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						break;
+						case 2:db.insertParameterService(nameservice,parametri[1],parametri[2],null,null,url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);					
+						break;
+						case 3:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],null,url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
+						conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);					
+						break;
+						case 4:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],parametri[4],url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
+						conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);	
+						conf[3]=s[n].substring(s[n].indexOf("<"+parametri[4]+">")+2+parametri[4].length(),s[n].indexOf("/"+parametri[4])-1);	
+						break;
+						}
+						//prima di inserire i dati bisogna controllare se ci sono gia nel db
+						Cursor curs=db.fetchService(nameservice);
+						String nome="";
+						if(url.indexOf("&", url.indexOf("servizio"))!=-1){
+							nome=(String) url.subSequence(url.indexOf("servizio=")+9, url.indexOf("&", url.indexOf("servizio=")));
+						}else{
+							nome=(String) url.toString().subSequence(url.indexOf("servizio=")+9, url.length());	
+						}
+						if(!(curs.moveToNext()))
+							db.insertService(nameservice,nome, conf[0],conf[1],conf[2],conf[3],url,"");
+						curs.close();
+					}
+				}
+			}*/
+			//db.close();
+			return 0;
+		}
+
+	}
+
+	public boolean onMenuItemClick(MenuItem item) {
+		byte[]a = null;
+		try {
+			pd = ProgressDialog.show(MainActivity.this,"Download GoJackMS","Connecting...",true,false);
+			// creo e avvio asynctask
+			prefs = getSharedPreferences("Setting", Context.MODE_PRIVATE);
+			String text = prefs.getString("url","");
+			if(text.equals("")){
+				Toast.makeText(getApplicationContext(), "Inserire URL al file gojack.php come URL preferito", Toast.LENGTH_SHORT).show();
+				pd.dismiss();
+			}else{
+				if(text.indexOf("?")==-1)
+					//a=Invio.scarica(text+"?sincweb=1");
+					text=text+"?ricez=1";
+				//res=Invio.scarica(text+"?sincweb=1");
+
+				else{
+					text=(String) text.subSequence(0, text.indexOf("?"));
+					Log.d("url", text);
+					text=text+"?ricez=1";
+					//a=Invio.scarica(text+"?sincweb=1");
+					//res=Invio.scarica(text+"?sincweb=1");
+				}
+				final String url=text;
+				AlertDialog alertDialog;
+				AlertDialog.Builder builder;
+				LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
+				View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
+				final EditText text_1=(EditText) layout.findViewById(R.id.text);
+				builder = new AlertDialog.Builder(MainActivity.this);
+				builder.setView(layout);
+				builder.setTitle("Password Web");
+				builder.setCancelable(false);
+				builder.setPositiveButton("Invia!",new OnClickListener(){
+					public void onClick(DialogInterface dialog, int id){
+						String captcha=text_1.getText().toString();
+						dialog.dismiss();
+						DownTask task = new DownTask();
+						task.execute(url+"&p="+captcha);
+						password="&p="+captcha;
+					}});
+				alertDialog = builder.create();
+				builder.show();	
+			}
+		} catch (Exception e) {
+			//Log.d("ciao", "Errore gzip");
+			//Toast.makeText(getApplicationContext(), a.toString(), Toast.LENGTH_LONG).show();
+			Toast.makeText(this.getApplicationContext(),"Aggiornare GoJack.php", Toast.LENGTH_LONG).show();
+			//	e.printStackTrace();
+		}
+		return true;	
+	}
+
+	
+	
+	
 }
