@@ -24,7 +24,7 @@ public class WorkServizio extends Activity{
 		Cursor c=db.fetchService(); // query
        startManagingCursor(c);
         while(c.moveToNext()){
-        	Servizio s=new Servizio(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7),c.getString(0));	
+        	Servizio s=new Servizio(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7),c.getString(8),c.getString(0));	
         	a.add(s);
         }
         c.close();

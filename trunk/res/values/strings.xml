@@ -8,7 +8,7 @@
     <string name="about_label">About</string>
     <string name="sms_label">Sms Inviati</string>
     <string name="about_title">GoJack</string> 
-	<string name="version">1.5.7</string> 
+	<string name="version">1.5.8</string> 
 	<string name="about_text_pre"><b>Versione:</b></string>  
 	<string name="imp3g">Impostazioni 3G</string> 
 	<string name="cancellatutti">Cancella Tutti i Messaggi</string> 
@@ -23,5 +23,6 @@
 	<string name="sms">Sms Inviati</string>
 	<string name="captcha">Captcha</string>
 	<string name="connettivita">Connettività</string>
-	<string name="smsinviati">Salvare SMS Inviati</string>  
+	<string name="smsinviati">Salvare SMS Inviati</string>
+	<string name="reciver">Ricevere GoJackMS</string>  
 </resources>

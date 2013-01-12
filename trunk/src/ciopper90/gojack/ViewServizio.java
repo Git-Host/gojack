@@ -1,6 +1,7 @@
 package ciopper90.gojack;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,22 +21,31 @@ import ciopper90.gojack.utility.Servizio;
 import ciopper90.gojack.work.WorkServizio;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -54,6 +64,9 @@ public class ViewServizio extends Activity{
 	private String dati[];
 	private String config[];
 	private String parametri[];
+	private String status;
+	
+	private String password="";
 
 
 	@SuppressWarnings("static-access")
@@ -86,6 +99,7 @@ public class ViewServizio extends Activity{
 		Intent mod=new Intent(ViewServizio.this,AddServizio.class);
 		Servizio s=ServiceList.get(position-1);
 		DatiServizio d=null;
+		if (!s.getName().equalsIgnoreCase("GoJackMS")) {
 		for(int i=0;i<DataServiceList.size();i++){
 			if(DataServiceList.get(i).getUrl().equals(s.getUrl())){
 				d=DataServiceList.get(i);				
@@ -122,6 +136,7 @@ public class ViewServizio extends Activity{
 		mod.putExtra("parametri", parametri);
 		mod.putExtra("config", config);
 		startActivity(mod);
+		}
 	}
 
 
@@ -165,7 +180,7 @@ public class ViewServizio extends Activity{
 		s.setName(s.getName());
 		ServiceList.add(s);
 		db.open();
-		db.insertService(s.getName(), s.getPrimo(), s.getSecondo(), s.getTerzo(), s.getQuarto(), s.getUrl(), s.getFirma());
+		db.insertService(s.getName(),s.getServizio(), s.getPrimo(), s.getSecondo(), s.getTerzo(), s.getQuarto(), s.getUrl(), s.getFirma());
 		db.close();
 		aggiornalist();
 	}
@@ -266,8 +281,26 @@ public class ViewServizio extends Activity{
 					//a=Invio.scarica(text+"?sincweb=1");
 					//res=Invio.scarica(text+"?sincweb=1");
 				}
-				DownTask task = new DownTask();
-				task.execute(text);
+				final String url=text;
+				AlertDialog alertDialog;
+				AlertDialog.Builder builder;
+				LayoutInflater inflater = (LayoutInflater) ViewServizio.this.getSystemService(LAYOUT_INFLATER_SERVICE);
+				View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
+				final EditText text_1=(EditText) layout.findViewById(R.id.text);
+				builder = new AlertDialog.Builder(ViewServizio.this);
+				builder.setView(layout);
+				builder.setTitle("Password Web");
+				builder.setCancelable(false);
+				builder.setPositiveButton("Invia!",new OnClickListener(){
+					public void onClick(DialogInterface dialog, int id){
+						String captcha=text_1.getText().toString();
+						dialog.dismiss();
+						DownTask task = new DownTask();
+						task.execute(url+"&p="+captcha);
+						password="&p="+captcha;
+					}});
+				alertDialog = builder.create();
+				builder.show();	
 				/*				//byte[] a=Base64.decode(res, Base64.DEFAULT);
 				if(a!=null){
 					InputStream is = new ByteArrayInputStream(a);	
@@ -328,12 +361,15 @@ public class ViewServizio extends Activity{
 
 			// aggiorno la progress dialog
 			publishProgress("Download");
+			InputStream is = null ;
 			try {
-				byte[] a=Invio.scarica(params[0]+"?sincweb=1");
+				byte[] a=Invio.scarica(text);
 				publishProgress("Extract");	
 				if(a!=null){
-					InputStream is = new ByteArrayInputStream(a);	
-					GZIPInputStream ginstream =new GZIPInputStream(is);
+					is = new ByteArrayInputStream(a);
+					GZIPInputStream ginstream;
+
+					ginstream = new GZIPInputStream(is);
 					String c="";
 					int len;
 
@@ -343,9 +379,12 @@ public class ViewServizio extends Activity{
 					}
 					len=0;
 					publishProgress("Import");
-					parseService(c);
+					int res=parseService(c);
 					//this.aggiornalist();
-					return "Servizi Inseriti Correttamente";
+					if(res==0)
+						return "Servizi Inseriti Correttamente";
+					else
+						return "Errore File GoJack.php";
 					//Toast.makeText(getApplicationContext(), "Servizi Inseriti Correttamente", Toast.LENGTH_LONG).show();
 				}else{
 					return "Errore Rete";
@@ -353,10 +392,25 @@ public class ViewServizio extends Activity{
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				return "File Servizi Non Presente";
+				try {
+				int len=0;
+				String d="";
+					while ((len = is.read()) != -1) 
+					{
+						d=d.concat(""+(char)len);
+					}
+					return d.substring(d.indexOf("<txt>")+5,d.indexOf("/txt")-1);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 			}
-
+			return "Errore Generico";
 		}
+		
+
+
 		@Override
 		protected void onProgressUpdate(String... values) {
 			// aggiorno la progress dialog
@@ -374,12 +428,12 @@ public class ViewServizio extends Activity{
 		}
 
 
-		private void parseService(String c) {
+		private int parseService(String c) {
 			db.open();
 			String[] s=c.split("<account ");
-			for(int i=1;i<s.length;i++){
+			/*for(int i=1;i<s.length;i++){
 				s[i]=s[i].substring(0, s[i].indexOf("/account")+9);
-			}
+			}*/
 			for(int i=1;i<s.length;i++){
 				int dist=s[i].indexOf("/data")-1-(s[i].indexOf("<data>")+6);
 				if(dist<=10){
@@ -396,90 +450,95 @@ public class ViewServizio extends Activity{
 			}
 			for(int n=1;n<s.length;n++){
 				//richiesta parametri x service
-				HttpClient httpclient = new DefaultHttpClient();
+				//HttpClient httpclient = new DefaultHttpClient();
 				int primo=s[n].indexOf("service=\"")+9;
 				int secondo=s[n].indexOf("\"", primo);
 				String name=s[n].substring(primo,secondo);
 				primo=s[n].indexOf("name=\"")+6;
 				secondo=s[n].indexOf("\"", primo);
 				String nameservice=s[n].substring(primo,secondo);
-				String url=text+name;
-				HttpPost httppost = new HttpPost(url+"&action=config");
-				HttpResponse response;
-				try {
-					response = httpclient.execute(httppost);
-					String returnString=EntityUtils.toString(response.getEntity());
-					if(returnString.indexOf("<config>")!=-1){
-						if(returnString.indexOf("<res>")!=-1){
-							//elaborare returnString per poi salvare il dato nel database
-							dati=new String[6];
-							dati[0]=(String) returnString.subSequence(returnString.indexOf("<nu>")+4, returnString.indexOf("</nu>"));
-							dati[1]=(String) returnString.subSequence(returnString.indexOf("<np>")+4, returnString.indexOf("</np>"));
-							dati[2]=(String) returnString.subSequence(returnString.indexOf("<nn>")+4, returnString.indexOf("</nn>"));
-							dati[3]="0";//returnString.subSequence(returnString.indexOf("<nu>"+4), returnString.indexOf("</nu>"));
-							dati[4]=(String) returnString.subSequence(returnString.indexOf("<mc>")+4, returnString.indexOf("</mc>"));
-							if(returnString.indexOf("<mm>")!=-1)
-								dati[5]=(String) returnString.subSequence(returnString.indexOf("<mm>")+4, returnString.indexOf("</mm>"));
-							else
-								dati[5]=(String) returnString.subSequence(returnString.indexOf("<mmm>")+5, returnString.indexOf("</mmm>"));	
-							db.insertDataService(nameservice, Integer.parseInt(dati[0]), Integer.parseInt(dati[1]), Integer.parseInt(dati[2]),Integer.parseInt(dati[3]), Integer.parseInt(dati[4]), Integer.parseInt(dati[5]), url);
-							int count=0;
-							for(int i=0;i<4;i++){
-								if(dati[i].equals("1")||dati[i].equals("2"))
-									count++;
-							}
-							parametri=new String[5];
-							if(returnString.indexOf("<n1>")!=-1){
-								switch(count){
-								case 4:parametri[4]=(String) returnString.subSequence(returnString.indexOf("<n4>")+4, returnString.indexOf("</n4>"));
-								case 3:parametri[3]=(String) returnString.subSequence(returnString.indexOf("<n3>")+4, returnString.indexOf("</n3>"));
-								case 2:parametri[2]=(String) returnString.subSequence(returnString.indexOf("<n2>")+4, returnString.indexOf("</n2>"));
-								case 1:parametri[1]=(String) returnString.subSequence(returnString.indexOf("<n1>")+4, returnString.indexOf("</n1>"));
-								parametri[0]="Nome Servizio";
-								}
-							}else{
-								parametri[0]="Nome Servizio";
-								parametri[1]="Username:";
-								parametri[2]="Password";
-								parametri[3]="Nick";		
-							}
-							String[] conf=new String[4];
-							for(int k=0;k<conf.length;k++)
-								conf[k]="";
-
-							switch(count){
-							case 1:db.insertParameterService(nameservice,parametri[1],null,null,null,url);
-							conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-							break;
-							case 2:db.insertParameterService(nameservice,parametri[1],parametri[2],null,null,url);
-							conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-							conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);					
-							break;
-							case 3:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],null,url);
-							conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-							conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
-							conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);					
-							break;
-							case 4:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],parametri[4],url);
-							conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-							conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
-							conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);	
-							conf[3]=s[n].substring(s[n].indexOf("<"+parametri[4]+">")+2+parametri[4].length(),s[n].indexOf("/"+parametri[4])-1);	
-							break;
-							}
-							//prima di inserire i dati bisogna controllare se ci sono gia nel db
-							Cursor curs=db.fetchService(nameservice);
-							if(!(curs.moveToNext()))
-								db.insertService(nameservice, conf[0],conf[1],conf[2],conf[3],url,"");
-							curs.close();
+				String url=text+name+password;
+				//response = httpclient.execute(httppost);
+				String returnString=null;
+				try{
+					returnString=s[n].substring(s[n].indexOf("<res>"),s[n].indexOf("/res")+5);
+				}catch(Exception e){
+					return 1;
+				}
+				if(returnString.indexOf("<config>")!=-1){
+					if(returnString.indexOf("<res>")!=-1){
+						//elaborare returnString per poi salvare il dato nel database
+						dati=new String[6];
+						dati[0]=(String) returnString.subSequence(returnString.indexOf("<nu>")+4, returnString.indexOf("</nu>"));
+						dati[1]=(String) returnString.subSequence(returnString.indexOf("<np>")+4, returnString.indexOf("</np>"));
+						dati[2]=(String) returnString.subSequence(returnString.indexOf("<nn>")+4, returnString.indexOf("</nn>"));
+						dati[3]="0";//returnString.subSequence(returnString.indexOf("<nu>"+4), returnString.indexOf("</nu>"));
+						dati[4]=(String) returnString.subSequence(returnString.indexOf("<mc>")+4, returnString.indexOf("</mc>"));
+						if(returnString.indexOf("<mm>")!=-1)
+							dati[5]=(String) returnString.subSequence(returnString.indexOf("<mm>")+4, returnString.indexOf("</mm>"));
+						else
+							dati[5]=(String) returnString.subSequence(returnString.indexOf("<mmm>")+5, returnString.indexOf("</mmm>"));	
+						db.insertDataService(nameservice, Integer.parseInt(dati[0]), Integer.parseInt(dati[1]), Integer.parseInt(dati[2]),Integer.parseInt(dati[3]), Integer.parseInt(dati[4]), Integer.parseInt(dati[5]), url);
+						int count=0;
+						for(int i=0;i<4;i++){
+							if(dati[i].equals("1")||dati[i].equals("2"))
+								count++;
 						}
+						parametri=new String[5];
+						if(returnString.indexOf("<n1>")!=-1){
+							switch(count){
+							case 4:parametri[4]=(String) returnString.subSequence(returnString.indexOf("<n4>")+4, returnString.indexOf("</n4>"));
+							case 3:parametri[3]=(String) returnString.subSequence(returnString.indexOf("<n3>")+4, returnString.indexOf("</n3>"));
+							case 2:parametri[2]=(String) returnString.subSequence(returnString.indexOf("<n2>")+4, returnString.indexOf("</n2>"));
+							case 1:parametri[1]=(String) returnString.subSequence(returnString.indexOf("<n1>")+4, returnString.indexOf("</n1>"));
+							parametri[0]="Nome Servizio";
+							}
+						}else{
+							parametri[0]="Nome Servizio";
+							parametri[1]="Username:";
+							parametri[2]="Password";
+							parametri[3]="Nick";		
+						}
+						String[] conf=new String[4];
+						for(int k=0;k<conf.length;k++)
+							conf[k]="";
+
+						switch(count){
+						case 1:db.insertParameterService(nameservice,parametri[1],null,null,null,url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						break;
+						case 2:db.insertParameterService(nameservice,parametri[1],parametri[2],null,null,url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);					
+						break;
+						case 3:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],null,url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
+						conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);					
+						break;
+						case 4:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],parametri[4],url);
+						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
+						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
+						conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);	
+						conf[3]=s[n].substring(s[n].indexOf("<"+parametri[4]+">")+2+parametri[4].length(),s[n].indexOf("/"+parametri[4])-1);	
+						break;
+						}
+						//prima di inserire i dati bisogna controllare se ci sono gia nel db
+						Cursor curs=db.fetchService(nameservice);
+						String nome="";
+						if(url.indexOf("&", url.indexOf("servizio"))!=-1){
+							nome=(String) url.subSequence(url.indexOf("servizio=")+9, url.indexOf("&", url.indexOf("servizio=")));
+						}else{
+							nome=(String) url.toString().subSequence(url.indexOf("servizio=")+9, url.length());	
+						}
+						if(!(curs.moveToNext()))
+							db.insertService(nameservice,nome, conf[0],conf[1],conf[2],conf[3],url,"");
+						curs.close();
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 			db.close();
+			return 0;
 		}
 
 	}

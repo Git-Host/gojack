@@ -126,7 +126,7 @@ public class AddServizio extends Activity{
 		
 	
 	protected void modify() {
-		db.UpdateService(id,name.getText().toString(), primo.getText().toString(), secondo.getText().toString(), terzo.getText().toString(), quarto.getText().toString(), config[1],firma.getText().toString());
+		db.UpdateService(id,name.getText().toString(),config[2], primo.getText().toString(), secondo.getText().toString(), terzo.getText().toString(), quarto.getText().toString(), config[1],firma.getText().toString());
 		//service.add(new Servizio(name.getText().toString(), user.getText().toString(), pass.getText().toString(),url.getText().toString()));
 		//salva(service);
 		Toast.makeText(getBaseContext(), "Dati Modificati", Toast.LENGTH_LONG).show();
@@ -137,7 +137,7 @@ public class AddServizio extends Activity{
 
 	protected void save() {
 		// questo metodo dovrebbe salvare l'account o2
-		db.insertService(config[0], primo.getText().toString(), secondo.getText().toString(), terzo.getText().toString(), quarto.getText().toString(), config[1],firma.getText().toString());
+		db.insertService(config[0],config[2], primo.getText().toString(), secondo.getText().toString(), terzo.getText().toString(), quarto.getText().toString(), config[1],firma.getText().toString());
 		Toast.makeText(getBaseContext(), "Dati Salvati", Toast.LENGTH_LONG).show();
 		this.finish();
 	}

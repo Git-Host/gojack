@@ -47,9 +47,10 @@ public class DatabaseService {
                 mDb.insert(ProductsMetaData.DATA_SERVICE, null, cv);
         }
         
-        public void insertService(String name,String primo,String secondo,String terzo,String quarto,String url,String firma){ //metodo per inserire i dati
+        public void insertService(String name,String nome,String primo,String secondo,String terzo,String quarto,String url,String firma){ //metodo per inserire i dati
             ContentValues cv=new ContentValues();
             cv.put("NomeServizio", name);
+            cv.put("Name",nome);
             cv.put("primo", primo);
             cv.put("secondo", secondo);
             cv.put("terzo", terzo);
@@ -103,10 +104,10 @@ public class DatabaseService {
             return mDb.query(ProductsMetaData.SMS, null,null,null,null,null,"id desc");              
         }
         
-        public void UpdateService(String id,String config, String string, String string2, String string3, String string4, String config2, String string5){ //metodo per fare la query di tutti i dati
+        public void UpdateService(String id,String config,String name, String string, String string2, String string3, String string4, String config2, String string5){ //metodo per fare la query di tutti i dati
         	//gestire update dei dati :DmDb.delete(SERVICE_TABLE_CREATE, whereClause, whereArgs)
         	this.DeleteService(id);
-        	this.insertService(config, string, string2, string3, string4, config2, string5);
+        	this.insertService(config,name, string, string2, string3, string4, config2, string5);
         	
         	
         }
@@ -144,7 +145,7 @@ public class DatabaseService {
         }
 
         private static final String DATA_SERVICE_TABLE_CREATE = "create table if not exists dati_servizi (NomeServizio varchar(20) not null primary key,primo integer not null,secondo integer not null,terzo integer not null,quarto integer not null,maxsms integer not null,maxchar integer not null,url varchar(50) not null)";
-        private static final String SERVICE_TABLE_CREATE = "create table if not exists servizi (id Integer primary key,NomeServizio varchar(20) not null ,primo varchar(20) not null,secondo varchar(20) ,terzo varchar(20),quarto varchar(20),url varchar(50) not null,firma varchar(40))";
+        private static final String SERVICE_TABLE_CREATE = "create table if not exists servizi (id Integer primary key,NomeServizio varchar(20) not null ,Name varcar(20),primo varchar(20) not null,secondo varchar(20) ,terzo varchar(20),quarto varchar(20),url varchar(50) not null,firma varchar(40))";
         private static final String PARAMETER_SERVICE_TABLE_CREATE = "create table if not exists parametri_servizi (NomeServizio varchar(20) not null primary key,primo varchar(20) not null,secondo varchar(20) ,terzo varchar(20),quarto varchar(20),url varchar(50) not null)";
         private static final String RUBRICA_TABLE_CREATE = "create table if not exists rubrica (NomeContatto varchar(20) not null primary key,numero varchar(20) not null,servizio varchar(20))";
         private static final String SMS_TABLE_CREATE = "create table if not exists sms (id Integer primary key,NomeContatto varchar(20),numero varchar(20) ,testo varchar(1000))";
