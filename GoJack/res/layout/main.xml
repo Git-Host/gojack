@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="1" android:alwaysDrawnWithCache="false">
+
+<LinearLayout android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="1" android:alwaysDrawnWithCache="false" >
+    <LinearLayout android:layout_width="match_parent" android:id="@+id/linearLayout2" android:layout_height="wrap_content">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="?android:attr/textAppearanceLarge" android:text="Servizio:" android:layout_weight="1" android:id="@+id/textView3"></TextView>
+        <Spinner android:id="@+id/listserv" android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Spinner>
+    </LinearLayout>
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteTextView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Numero" 
+                android:imeOptions="actionNext"
+        		android:inputType="textAutoComplete">
+            </AutoCompleteTextView>
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <ImageButton
+            android:id="@+id/rubrica"
+            android:layout_width="64dip"
+            android:layout_height="64dip"
+            android:layout_gravity="right"
+            android:src="@drawable/ic_menu_allfriends" />
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:id="@+id/linearLayout3" android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Messaggio"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="0/160"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        </RelativeLayout>
+
+        <EditText
+            android:id="@+id/testo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:hint="Testo Messaggio" 
+            android:inputType="textShortMessage|textMultiLine" />
+
+        <Button android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/invia" android:text="Invia"></Button>
+
+    </LinearLayout>
+</LinearLayout>
+</ScrollView>
