@@ -1,0 +1,12 @@
+V 2.2
+sistemato problema rotazione schermo durante il download dei servizi
+sistemato problema rotazione schermo durante inserimento password
+corretta la sezione dell'invio del messaggio risolvendo alcuni problemi di crash
+
+
+V 2.0
+eliminazione carattere " " con ""
+salvataggio dell'ultimo servizio usato in ogni conversazione
+correzione di bug riguardanti il wifi e il modulo 3g su versioni di android >=4
+implementazione grazie al software SmsDroid delle conversazioni
+eliminate la sezione "generali" delle impostazioni
