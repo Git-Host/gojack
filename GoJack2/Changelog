@@ -1,8 +1,13 @@
 V 2.2
+sistemato inserimento automatico password nel link dei servizi durante l'importazione
 sistemato problema rotazione schermo durante il download dei servizi
 sistemato problema rotazione schermo durante inserimento password
 corretta la sezione dell'invio del messaggio risolvendo alcuni problemi di crash
 
+v 2.1
+salvataggio del servizio usato anche quando viene inviato il primo messaggio(prima non lo faceva)
+corretto problema creazione nuova conversazione se il numero veniva preso dalla rubrica
+inserita una prima gestione degli errori :D
 
 V 2.0
 eliminazione carattere " " con ""

@@ -23,7 +23,12 @@
         android:id="@+id/text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
-    
+
+    <CheckBox
+        android1:id="@+id/checkBox1"
+        android1:layout_width="wrap_content"
+        android1:layout_height="wrap_content"
+        android1:text="@string/salvaPassword" />
     
     </LinearLayout>
 

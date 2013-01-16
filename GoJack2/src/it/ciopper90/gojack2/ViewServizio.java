@@ -54,6 +54,7 @@ public class ViewServizio extends Activity {
 	private static String status;
 	private static String url;
 	private Context context;
+	private String password;
 
 	// private static AlertDialog alertDialog;
 
@@ -338,6 +339,7 @@ public class ViewServizio extends Activity {
 				String captcha = text_1.getText().toString();
 				dialog.dismiss();
 				DownTask task = new DownTask();
+				ViewServizio.this.password = "&p=" + captcha;
 				task.execute(ViewServizio.url + "&p=" + captcha);
 			}
 		});
@@ -468,7 +470,7 @@ public class ViewServizio extends Activity {
 				primo = s[n].indexOf("name=\"") + 6;
 				secondo = s[n].indexOf("\"", primo);
 				String nameservice = s[n].substring(primo, secondo);
-				String url = this.text + name;
+				String url = this.text + name + ViewServizio.this.password;
 				// response = httpclient.execute(httppost);
 				String returnString = null;
 				try {
