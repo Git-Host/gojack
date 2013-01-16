@@ -6,7 +6,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
 import ciopper90.gojack.utility.DatabaseRubrica;
@@ -34,6 +38,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -53,7 +58,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -61,8 +65,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.BaseColumns;
-import android.provider.CallLog.Calls;
+import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 
@@ -203,6 +206,8 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 			LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
 			View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
 			ImageView image = (ImageView) layout.findViewById(R.id.image);
+			CheckBox b=(CheckBox) layout.findViewById(R.id.checkBox1);
+			b.setVisibility(View.GONE);
 			Bitmap bMap = null;
 			try {
 				bMap = BitmapFactory.decodeStream(this.openFileInput("captcha.jpg"));
@@ -249,7 +254,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		rubrica.setOnClickListener(new ImageButton.OnClickListener(){
 
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 				Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 				startActivityForResult(intent, RQS_PICK_CONTACT);
 			}});
@@ -259,7 +263,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		invia.setOnClickListener(new Button.OnClickListener(){
 
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 				if(Controlla())
 				{
 					for(int i=0;i<o2.size();i++)
@@ -301,10 +304,9 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 
 
 
-	private String TAG= "ciao";
 	void showRows(final Context context, final Uri u) {
 		Uri mSmsQueryUri = Uri.parse("content://sms/");
-		String columns[] = new String[] {"person", "address", "body", "date","status"};
+		//String columns[] = new String[] {"person", "address", "body", "date","status"};
 		String sortOrder = "date ASC";
 
 		ContentResolver mContentResolver = context.getContentResolver();
@@ -348,7 +350,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 
 		if(requestCode == RQS_PICK_CONTACT){
@@ -502,6 +503,8 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 			LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
 			View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
 			ImageView image = (ImageView) layout.findViewById(R.id.image);
+			CheckBox b=(CheckBox) layout.findViewById(R.id.checkBox1);
+			b.setVisibility(View.GONE);
 			Bitmap bMap = null;
 			try {
 				bMap = BitmapFactory.decodeStream(this.openFileInput("captcha.jpg"));
@@ -538,8 +541,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 			builder.show();
 		}
 		else{
-
-
 			if(prova.contains("<res>")||prova.contains("500")){
 				if(prova.equals("")){
 					AlertDialog.Builder builder=new AlertDialog.Builder(this);
@@ -665,8 +666,8 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		values.put("seen", 1);
 
 		getContentResolver().insert(Uri.parse("content://sms"), values);
-
 	}
+
 
 	@SuppressWarnings("unused")
 	private void addsmsprog() {
@@ -748,12 +749,10 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		return super.onKeyDown(keyCode, event);
 	}
 	public void afterTextChanged(Editable s) {
-		// TODO Auto-generated method stub
 
 	}
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
-		// TODO Auto-generated method stub
 
 	}
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -767,7 +766,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 
 	}
 	public void onNothingSelected(AdapterView<?> arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -775,14 +773,14 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 	@Override
 	public void onCreateContextMenu ( ContextMenu menu, View v, ContextMenuInfo menuInfo ) {
 
-
-		if ( v.getId() == R.id.testo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		//menu.add( Menu.NONE, Menu.NONE, Menu.NONE, "Ultimo Sms" );
+		/*if ( v.getId() == R.id.testo) {
 			menu.add( Menu.NONE, Menu.NONE, Menu.NONE, "Ultimo Sms" );
 		}
 		if ( v.getId() == R.id.autoCompleteTextView1) {
 			menu.add( Menu.NONE, Menu.NONE, Menu.NONE, "Ultimo Numero" );
-		}
-		super.onCreateContextMenu( menu, v, menuInfo );
+		}*/
 
 	}
 
@@ -865,7 +863,7 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		menu.add(GROUPA,order,order++,getResources().getString(R.string.about_label)).setIntent(new Intent(MainActivity.this,About.class)).setIcon(android.R.drawable.ic_menu_info_details);
 		return true;
 	}
-	
+
 	private class DownTask extends AsyncTask<String,String,String>  {
 
 		private String text;
@@ -899,8 +897,8 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 					publishProgress("Import");
 					int res=parseMS(c);
 					//this.aggiornalist();
-					if(res==0)
-						return "Scaricati "+res+" GoJackMS";
+					if(res!=0)
+						return "Scaricati "+(res-1)+" GoJackMS";
 					else
 						if(res==-1)
 							return "Errore File GoJack.php";
@@ -913,10 +911,9 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 					//Toast.makeText(getApplicationContext(), "Errore Rete", Toast.LENGTH_LONG).show();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				try {
-				int len=0;
-				String d="";
+					int len=0;
+					String d="";
 					while ((len = is.read()) != -1) 
 					{
 						d=d.concat(""+(char)len);
@@ -926,11 +923,11 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
+
 			}
 			return "Errore Generico";
 		}
-		
+
 
 
 		@Override
@@ -943,113 +940,65 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		protected void onPostExecute(String result) {
 			// chiudo la progress dialog
 			pd.dismiss();
-
-			//operazioni di chiusura
-			//not(result);
+			
+			Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			 
+			// Attiva la vibrazione per 1 secondo
+			v.vibrate(1000);
+			
+			/*try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			deletesms(context,"+3999912345670");
+			*///operazioni di chiusura
+			Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
 
 		}
 
+		private void addreceive(String sender,String body, long date) {
+			ContentValues values = new ContentValues();
+			String to=sender;
+			values.put("address",to);
+			values.put("body", body);
+			values.put("type", 1);
+			values.put("read", 0);
+			values.put("seen", 0);
+			values.put("date", date);
+
+			getContentResolver().insert(Uri.parse("content://sms"), values);
+		}
 
 		private int parseMS(String c) {
 			Log.d("SMS", c);
 			String[] s=c.split("<msg ");
-			/*for(int n=1;n<s.length;n++){
-				//richiesta parametri x service
-				//HttpClient httpclient = new DefaultHttpClient();
-				int primo=s[n].indexOf("service=\"")+9;
-				int secondo=s[n].indexOf("\"", primo);
-				String name=s[n].substring(primo,secondo);
-				primo=s[n].indexOf("name=\"")+6;
-				secondo=s[n].indexOf("\"", primo);
-				String nameservice=s[n].substring(primo,secondo);
-				String url=text+name+password;
-				//response = httpclient.execute(httppost);
-				String returnString=null;
-				try{
-					returnString=s[n].substring(s[n].indexOf("<res>"),s[n].indexOf("/res")+5);
-				}catch(Exception e){
-					return 1;
+			for(int n=1;n<s.length;n++){
+				String msg=s[n].substring(0, s[n].indexOf("/msg"));
+				String msg_num=msg.substring(msg.indexOf("sender=\"")+8, msg.indexOf("\"",msg.indexOf("sender=\"")+9));
+				String msg_hour=msg.substring(msg.indexOf("hour=\"")+6, msg.indexOf("\"",msg.indexOf("hour=\"")+7));
+				String msg_date=msg.substring(msg.indexOf("date=\"")+6, msg.indexOf("\"",msg.indexOf("date=\"")+7));
+				msg_date=msg_date.substring(0, 6)+"20"+msg_date.substring(6);
+				String msg_text=msg.substring(msg.indexOf("\">")+2, msg.indexOf("<"));
+				DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				Date date = null;
+				try {
+					date = formatter.parse(msg_date +" " +msg_hour);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				if(returnString.indexOf("<config>")!=-1){
-					if(returnString.indexOf("<res>")!=-1){
-						//elaborare returnString per poi salvare il dato nel database
-						dati=new String[6];
-						dati[0]=(String) returnString.subSequence(returnString.indexOf("<nu>")+4, returnString.indexOf("</nu>"));
-						dati[1]=(String) returnString.subSequence(returnString.indexOf("<np>")+4, returnString.indexOf("</np>"));
-						dati[2]=(String) returnString.subSequence(returnString.indexOf("<nn>")+4, returnString.indexOf("</nn>"));
-						dati[3]="0";//returnString.subSequence(returnString.indexOf("<nu>"+4), returnString.indexOf("</nu>"));
-						dati[4]=(String) returnString.subSequence(returnString.indexOf("<mc>")+4, returnString.indexOf("</mc>"));
-						if(returnString.indexOf("<mm>")!=-1)
-							dati[5]=(String) returnString.subSequence(returnString.indexOf("<mm>")+4, returnString.indexOf("</mm>"));
-						else
-							dati[5]=(String) returnString.subSequence(returnString.indexOf("<mmm>")+5, returnString.indexOf("</mmm>"));	
-						db.insertDataService(nameservice, Integer.parseInt(dati[0]), Integer.parseInt(dati[1]), Integer.parseInt(dati[2]),Integer.parseInt(dati[3]), Integer.parseInt(dati[4]), Integer.parseInt(dati[5]), url);
-						int count=0;
-						for(int i=0;i<4;i++){
-							if(dati[i].equals("1")||dati[i].equals("2"))
-								count++;
-						}
-						parametri=new String[5];
-						if(returnString.indexOf("<n1>")!=-1){
-							switch(count){
-							case 4:parametri[4]=(String) returnString.subSequence(returnString.indexOf("<n4>")+4, returnString.indexOf("</n4>"));
-							case 3:parametri[3]=(String) returnString.subSequence(returnString.indexOf("<n3>")+4, returnString.indexOf("</n3>"));
-							case 2:parametri[2]=(String) returnString.subSequence(returnString.indexOf("<n2>")+4, returnString.indexOf("</n2>"));
-							case 1:parametri[1]=(String) returnString.subSequence(returnString.indexOf("<n1>")+4, returnString.indexOf("</n1>"));
-							parametri[0]="Nome Servizio";
-							}
-						}else{
-							parametri[0]="Nome Servizio";
-							parametri[1]="Username:";
-							parametri[2]="Password";
-							parametri[3]="Nick";		
-						}
-						String[] conf=new String[4];
-						for(int k=0;k<conf.length;k++)
-							conf[k]="";
-
-						switch(count){
-						case 1:db.insertParameterService(nameservice,parametri[1],null,null,null,url);
-						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-						break;
-						case 2:db.insertParameterService(nameservice,parametri[1],parametri[2],null,null,url);
-						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);					
-						break;
-						case 3:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],null,url);
-						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
-						conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);					
-						break;
-						case 4:db.insertParameterService(nameservice,parametri[1],parametri[2],parametri[3],parametri[4],url);
-						conf[0]=s[n].substring(s[n].indexOf("<"+parametri[1]+">")+2+parametri[1].length(),s[n].indexOf("/"+parametri[1])-1);					
-						conf[1]=s[n].substring(s[n].indexOf("<"+parametri[2]+">")+2+parametri[2].length(),s[n].indexOf("/"+parametri[2])-1);
-						conf[2]=s[n].substring(s[n].indexOf("<"+parametri[3]+">")+2+parametri[3].length(),s[n].indexOf("/"+parametri[3])-1);	
-						conf[3]=s[n].substring(s[n].indexOf("<"+parametri[4]+">")+2+parametri[4].length(),s[n].indexOf("/"+parametri[4])-1);	
-						break;
-						}
-						//prima di inserire i dati bisogna controllare se ci sono gia nel db
-						Cursor curs=db.fetchService(nameservice);
-						String nome="";
-						if(url.indexOf("&", url.indexOf("servizio"))!=-1){
-							nome=(String) url.subSequence(url.indexOf("servizio=")+9, url.indexOf("&", url.indexOf("servizio=")));
-						}else{
-							nome=(String) url.toString().subSequence(url.indexOf("servizio=")+9, url.length());	
-						}
-						if(!(curs.moveToNext()))
-							db.insertService(nameservice,nome, conf[0],conf[1],conf[2],conf[3],url,"");
-						curs.close();
-					}
-				}
-			}*/
-			//db.close();
-			return 0;
+				long dateInLong = date.getTime();
+				addreceive(msg_num,msg_text,dateInLong);
+			}
+			//createFakeSms(context,"+399991234567");
+			return s.length;
 		}
 
 	}
 
 	public boolean onMenuItemClick(MenuItem item) {
-		byte[]a = null;
 		try {
 			pd = ProgressDialog.show(MainActivity.this,"Download GoJackMS","Connecting...",true,false);
 			// creo e avvio asynctask
@@ -1060,48 +1009,123 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 				pd.dismiss();
 			}else{
 				if(text.indexOf("?")==-1)
-					//a=Invio.scarica(text+"?sincweb=1");
 					text=text+"?ricez=1";
-				//res=Invio.scarica(text+"?sincweb=1");
 
 				else{
 					text=(String) text.subSequence(0, text.indexOf("?"));
 					Log.d("url", text);
 					text=text+"?ricez=1";
-					//a=Invio.scarica(text+"?sincweb=1");
-					//res=Invio.scarica(text+"?sincweb=1");
 				}
 				final String url=text;
-				AlertDialog alertDialog;
-				AlertDialog.Builder builder;
-				LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
-				View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
-				final EditText text_1=(EditText) layout.findViewById(R.id.text);
-				builder = new AlertDialog.Builder(MainActivity.this);
-				builder.setView(layout);
-				builder.setTitle("Password Web");
-				builder.setCancelable(false);
-				builder.setPositiveButton("Invia!",new OnClickListener(){
-					public void onClick(DialogInterface dialog, int id){
-						String captcha=text_1.getText().toString();
-						dialog.dismiss();
-						DownTask task = new DownTask();
-						task.execute(url+"&p="+captcha);
-						password="&p="+captcha;
-					}});
-				alertDialog = builder.create();
-				builder.show();	
+				if(prefs.getString("passw", null)==null){
+					//AlertDialog alertDialog;
+					AlertDialog.Builder builder;
+					LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
+					View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
+					final EditText text_1=(EditText) layout.findViewById(R.id.text);
+					final CheckBox b=(CheckBox) layout.findViewById(R.id.checkBox1);
+					builder = new AlertDialog.Builder(MainActivity.this);
+					builder.setView(layout);
+					builder.setTitle("Password Web");
+					//builder.setCancelable(false);
+					builder.setPositiveButton("Invia!",new OnClickListener(){
+						public void onClick(DialogInterface dialog, int id){
+							String captcha=text_1.getText().toString();
+							dialog.dismiss();
+							DownTask task = new DownTask();
+							if(b.isChecked()){
+								savepassword(captcha);
+							}
+							password="&p="+captcha;
+							task.execute(url+"&p="+captcha);
+						}});
+					//alertDialog = builder.create();
+					builder.create();
+					builder.show();	
+				}else{
+					DownTask task = new DownTask();
+					password="&p="+prefs.getString("passw", null);
+					task.execute(url+password);					
+				}
 			}
 		} catch (Exception e) {
 			//Log.d("ciao", "Errore gzip");
 			//Toast.makeText(getApplicationContext(), a.toString(), Toast.LENGTH_LONG).show();
 			Toast.makeText(this.getApplicationContext(),"Aggiornare GoJack.php", Toast.LENGTH_LONG).show();
-			//	e.printStackTrace();
 		}
 		return true;	
 	}
 
-	
-	
-	
+/*	private void deletesms(Context context,String sender) {
+		getContentResolver().delete(Uri.parse("content://sms"), "address=?", new String[] {sender});
+	}
+	private static void createFakeSms(Context context, String sender) {
+		byte[] pdu = null;
+		byte[] scBytes = PhoneNumberUtils
+				.networkPortionToCalledPartyBCD("0000000000");
+		byte[] senderBytes = PhoneNumberUtils
+				.networkPortionToCalledPartyBCD(sender);
+		int lsmcs = scBytes.length;
+		byte[] dateBytes = new byte[7];
+		Calendar calendar = new GregorianCalendar();
+		dateBytes[0] = reverseByte((byte) (calendar.get(Calendar.YEAR)));
+		dateBytes[1] = reverseByte((byte) (calendar.get(Calendar.MONTH) + 1));
+		dateBytes[2] = reverseByte((byte) (calendar.get(Calendar.DAY_OF_MONTH)));
+		dateBytes[3] = reverseByte((byte) (calendar.get(Calendar.HOUR_OF_DAY)));
+		dateBytes[4] = reverseByte((byte) (calendar.get(Calendar.MINUTE)));
+		dateBytes[5] = reverseByte((byte) (calendar.get(Calendar.SECOND)));
+		dateBytes[6] = reverseByte((byte) ((calendar.get(Calendar.ZONE_OFFSET) + calendar
+				.get(Calendar.DST_OFFSET)) / (60 * 1000 * 15)));
+		try {
+			ByteArrayOutputStream bo = new ByteArrayOutputStream();
+			bo.write(lsmcs);
+			bo.write(scBytes);
+			bo.write(0x04);
+			bo.write((byte) sender.length());
+			bo.write(senderBytes);
+			bo.write(0x00);
+			bo.write(0x00); // encoding: 0 for default 7bit
+			bo.write(dateBytes);
+			try {
+				String sReflectedClassName = "com.android.internal.telephony.GsmAlphabet";
+				Class cReflectedNFCExtras = Class.forName(sReflectedClassName);
+				Method stringToGsm7BitPacked = cReflectedNFCExtras.getMethod(
+						"stringToGsm7BitPacked", new Class[] { String.class });
+				stringToGsm7BitPacked.setAccessible(true);
+				byte[] bodybytes = (byte[]) stringToGsm7BitPacked.invoke(null,
+						"cioa");
+				bo.write(bodybytes);
+			} catch (Exception e) {
+			}
+
+			pdu = bo.toByteArray();
+		} catch (IOException e) {
+		}
+		String test="";
+		for(int i=0;i<pdu.length;i++)
+			test=test+ (char)pdu[i];
+
+		Intent intent = new Intent();
+		intent.setClassName("com.android.mms",
+				"com.android.mms.transaction.SmsReceiverService");
+		intent.setAction("android.provider.Telephony.SMS_RECEIVED");
+		intent.putExtra("pdus", new Object[] { pdu });
+		intent.putExtra("format", "3gpp");
+		context.startService(intent);
+	}
+
+	private static byte reverseByte(byte b) {
+		return (byte) ((b & 0xF0) >> 4 | (b & 0x0F) << 4);
+	}
+*/
+	protected void savepassword(String captcha2) {
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString("passw", captcha2);
+		editor.commit();	
+
+	}
+
+
+
+
 }

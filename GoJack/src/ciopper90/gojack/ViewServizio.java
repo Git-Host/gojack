@@ -44,6 +44,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -287,6 +288,8 @@ public class ViewServizio extends Activity{
 				LayoutInflater inflater = (LayoutInflater) ViewServizio.this.getSystemService(LAYOUT_INFLATER_SERVICE);
 				View layout = inflater.inflate(R.layout.dialog,(ViewGroup) findViewById(R.id.layout_root));
 				final EditText text_1=(EditText) layout.findViewById(R.id.text);
+				CheckBox b=(CheckBox) layout.findViewById(R.id.checkBox1);
+				b.setVisibility(View.GONE);
 				builder = new AlertDialog.Builder(ViewServizio.this);
 				builder.setView(layout);
 				builder.setTitle("Password Web");
@@ -295,9 +298,9 @@ public class ViewServizio extends Activity{
 					public void onClick(DialogInterface dialog, int id){
 						String captcha=text_1.getText().toString();
 						dialog.dismiss();
-						DownTask task = new DownTask();
-						task.execute(url+"&p="+captcha);
+						DownTask task = new DownTask();	
 						password="&p="+captcha;
+						task.execute(url+"&p="+captcha);
 					}});
 				alertDialog = builder.create();
 				builder.show();	

@@ -110,35 +110,7 @@ public class Invio {
 			String body=testo.getText().toString();
 			String to;
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-			if(servizio.equalsIgnoreCase("GoJackMS")){
-				to=number.getText().toString();
-				int fine=to.indexOf("<");
-				to=to.substring(0,fine);
-				
-				
-				
-				// Get Instant Messenger.........
-				ContentResolver cr = context.getContentResolver();
-				String imWhere = ContactsContract.Data.DISPLAY_NAME + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
-                String[] imWhereParams = new String[]{to,
-                    ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE};
-                Cursor imCur = cr.query(ContactsContract.Data.CONTENT_URI,
-                        null, imWhere, imWhereParams, null);
-                String web="";
-                if (imCur.moveToFirst()) {
-                    web = imCur.getString(
-                             imCur.getColumnIndex(ContactsContract.CommonDataKinds.Website.URL));
-                }
-                imCur.close();
-                if(web!=""){
-                	nameValuePairs.add(new BasicNameValuePair("rcpt", web));
-                	nameValuePairs.add(new BasicNameValuePair("lang", "it"));
-                	nameValuePairs.add(new BasicNameValuePair("text", body));
-                }else{
-                	return "<res><num>2</num><txt>manca numero interno di gojack</txt></res>";
-                }
-                	
-			}else{
+
 			//estraggo numero :D
 			to=number.getText().toString();
 			int inizio=to.indexOf("<");
@@ -153,13 +125,12 @@ public class Invio {
 				}
 
 			}
-				nameValuePairs.add(new BasicNameValuePair("user", primo));
-				nameValuePairs.add(new BasicNameValuePair("pass", secondo));
-				nameValuePairs.add(new BasicNameValuePair("nick", terzo));//+"$$"+quarto));
-				nameValuePairs.add(new BasicNameValuePair("rcpt", to));
-				nameValuePairs.add(new BasicNameValuePair("lang", "it"));
-				nameValuePairs.add(new BasicNameValuePair("text", body));
-			}
+			nameValuePairs.add(new BasicNameValuePair("user", primo));
+			nameValuePairs.add(new BasicNameValuePair("pass", secondo));
+			nameValuePairs.add(new BasicNameValuePair("nick", terzo));//+"$$"+quarto));
+			nameValuePairs.add(new BasicNameValuePair("rcpt", to));
+			nameValuePairs.add(new BasicNameValuePair("lang", "it"));
+			nameValuePairs.add(new BasicNameValuePair("text", body));
 			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
 			HttpResponse response = httpclient.execute(httppost);
