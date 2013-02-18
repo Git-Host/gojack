@@ -18,32 +18,49 @@
  */
 package it.ciopper90.gojack2;
 
+import it.ciopper90.gojack2.added.Invio;
 import it.ciopper90.gojack2.added.Setting;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.zip.GZIPInputStream;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -68,6 +85,12 @@ public final class ConversationListActivity extends SherlockActivity implements
 		OnItemClickListener, OnItemLongClickListener {
 	/** Tag for output. */
 	public static final String TAG = "main";
+	/** mie variabili */
+	private Context context;
+	private ProgressDialog pd;
+	private SharedPreferences prefs;
+	private static String alert;
+	private static String url;
 
 	/** ORIG_URI to resolve. */
 	static final Uri URI = Uri.parse("content://mms-sms/conversations/");
@@ -238,7 +261,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 				this.getString(R.string.app_name), R.array.updates, R.array.notes_from_dev);
 
 		showRows(this);
-
+		this.context = this;
 		final AbsListView list = this.getListView();
 		this.adapter = new ConversationAdapter(this);
 		this.setListAdapter(this.adapter);
@@ -251,6 +274,18 @@ public final class ConversationListActivity extends SherlockActivity implements
 		this.longItemClickDialog[WHICH_VIEW] = this.getString(R.string.view_thread_);
 		this.longItemClickDialog[WHICH_DELETE] = this.getString(R.string.delete_thread_);
 		this.longItemClickDialog[WHICH_MARK_SPAM] = this.getString(R.string.filter_spam_);
+		if (alert == null) {
+			alert = "";
+		}
+		if (alert.equals("password")) {
+			this.CreateDialog();
+		} else {
+			if (!alert.equals("")) {
+				this.pd = ProgressDialog
+						.show(this.context, "Download GoJackMS", alert, true, false);
+			}
+		}
+
 	}
 
 	@Override
@@ -409,9 +444,86 @@ public final class ConversationListActivity extends SherlockActivity implements
 			markRead(this, Uri.parse("content://sms/"), 1);
 			markRead(this, Uri.parse("content://mms/"), 1);
 			return true;
+		case R.id.item_download:
+			try {
+				// creo e avvio asynctask
+				this.prefs = this.getSharedPreferences("Setting", Context.MODE_PRIVATE);
+				String text = this.prefs.getString("url", "");
+				if (text.equals("")) {
+					Toast.makeText(this.getApplicationContext(),
+							"Inserire URL al file gojack.php come URL preferito",
+							Toast.LENGTH_SHORT).show();
+					this.pd.dismiss();
+				} else {
+					if (text.indexOf("?") == -1) {
+						text = text + "?ricez=1";
+					} else {
+						text = (String) text.subSequence(0, text.indexOf("?"));
+						Log.d("url", text);
+						text = text + "?ricez=1";
+					}
+					url = text;
+					if (this.prefs.getString("passw", "").equals("")) {
+						// AlertDialog alertDialog;
+						this.CreateDialog();
+					} else {
+						alert = "Connecting...";
+						this.pd = ProgressDialog.show(this.context, "Download GoJackMS",
+								"Connecting...", true, false);
+						DownTask task = new DownTask();
+						String password = "&p=" + this.prefs.getString("passw", null);
+						task.execute(url + password);
+					}
+				}
+			} catch (Exception e) {
+				Toast.makeText(this.context, "Aggiornare GoJack.php", Toast.LENGTH_LONG).show();
+			}
+			return true;
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	public void CreateDialog() {
+		AlertDialog.Builder builder;
+		LayoutInflater inflater = (LayoutInflater) this.context
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View layout = inflater.inflate(R.layout.dialog,
+				(ViewGroup) this.findViewById(R.id.layout_root));
+		final EditText text_1 = (EditText) layout.findViewById(R.id.text);
+		final CheckBox b = (CheckBox) layout.findViewById(R.id.checkBox1);
+		// b.setTextColor(Color.WHITE);
+		builder = new AlertDialog.Builder(this.context);
+		builder.setView(layout);
+		builder.setTitle("Password Web");
+		builder.setCancelable(false);
+		builder.setPositiveButton("Invia!", new OnClickListener() {
+			public void onClick(final DialogInterface dialog, final int id) {
+				String captcha = text_1.getText().toString();
+				dialog.dismiss();
+				ConversationListActivity.this.pd = ProgressDialog.show(
+						ConversationListActivity.this.context, "Download GoJackMS",
+						"Connecting...", true, false);
+				alert = "Connecting...";
+				DownTask task = new DownTask();
+				if (b.isChecked()) {
+					ConversationListActivity.this.savepassword(captcha);
+				}
+				// password = "&p=" + captcha;
+				task.execute(url + "&p=" + captcha);
+			}
+		});
+		builder.setNegativeButton("Annulla", new OnClickListener() {
+			public void onClick(final DialogInterface dialog, final int id) {
+				alert = "";
+				dialog.dismiss();
+			}
+		});
+		// alertDialog = builder.create();
+		builder.create();
+		builder.show();
+		alert = "password";
 	}
 
 	/**
@@ -553,4 +665,149 @@ public final class ConversationListActivity extends SherlockActivity implements
 			return DateFormat.getTimeFormat(context).format(t);
 		}
 	}
+
+	private class DownTask extends AsyncTask<String, String, String> {
+
+		private String text;
+
+		@Override
+		protected String doInBackground(final String... params) {
+			this.text = params[0];
+			// result = null;
+
+			// interrogazione del web service
+
+			// aggiorno la progress dialog
+			this.publishProgress("Download");
+			InputStream is = null;
+			try {
+				byte[] a = Invio.scarica(this.text);
+				this.publishProgress("Extract");
+				if (a != null) {
+					is = new ByteArrayInputStream(a);
+					GZIPInputStream ginstream;
+
+					ginstream = new GZIPInputStream(is);
+					String c = "";
+					int len;
+
+					while ((len = ginstream.read()) != -1) {
+						c = c.concat("" + (char) len);
+					}
+					len = 0;
+					this.publishProgress("Import");
+					int res = this.parseMS(c);
+					// this.aggiornalist();
+					if (res != 0) {
+						return "Scaricati " + (res - 1) + " GoJackMS";
+					} else if (res == -1) {
+						return "Errore File GoJack.php";
+					} else {
+						return "Nessun Nuovo GoJackMS";
+					}
+					// Toast.makeText(getApplicationContext(),
+					// "Servizi Inseriti Correttamente",
+					// Toast.LENGTH_LONG).show();
+				} else {
+					return "Errore Rete";
+					// Toast.makeText(getApplicationContext(), "Errore Rete",
+					// Toast.LENGTH_LONG).show();
+				}
+			} catch (IOException e) {
+				try {
+					int len = 0;
+					String d = "";
+					while ((len = is.read()) != -1) {
+						d = d.concat("" + (char) len);
+					}
+					return d.substring(d.indexOf("<txt>") + 5, d.indexOf("/txt") - 1);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+			}
+			return "Errore Generico";
+		}
+
+		@Override
+		protected void onProgressUpdate(final String... values) {
+			// aggiorno la progress dialog
+			ConversationListActivity.this.pd.setMessage(values[0]);
+			alert = values[0];
+		}
+
+		@Override
+		protected void onPostExecute(final String result) {
+			// chiudo la progress dialog
+			ConversationListActivity.this.pd.dismiss();
+
+			Vibrator v = (Vibrator) ConversationListActivity.this
+					.getSystemService(Context.VIBRATOR_SERVICE);
+
+			// Attiva la vibrazione per 1 secondo
+			v.vibrate(500);
+
+			/*
+			 * try { Thread.sleep(1000); } catch (InterruptedException e) { //
+			 * TODO Auto-generated catch block e.printStackTrace(); }
+			 * deletesms(context,"+3999912345670");
+			 */// operazioni di chiusura
+			Toast.makeText(ConversationListActivity.this.context, result, Toast.LENGTH_SHORT)
+					.show();
+			alert = "";
+
+		}
+
+		private void addreceive(final String sender, final String body, final long date) {
+			ContentValues values = new ContentValues();
+			String to = sender;
+			values.put("address", to);
+			values.put("body", body);
+			values.put("type", 1);
+			values.put("read", 0);
+			values.put("seen", 0);
+			values.put("date", date);
+
+			ConversationListActivity.this.getContentResolver().insert(Uri.parse("content://sms"),
+					values);
+		}
+
+		private int parseMS(final String c) {
+			Log.d("SMS", c);
+			String[] s = c.split("<msg ");
+			for (int n = 1; n < s.length; n++) {
+				String msg = s[n].substring(0, s[n].indexOf("/msg"));
+				String msg_num = msg.substring(msg.indexOf("sender=\"") + 8,
+						msg.indexOf("\"", msg.indexOf("sender=\"") + 9));
+				String msg_hour = msg.substring(msg.indexOf("hour=\"") + 6,
+						msg.indexOf("\"", msg.indexOf("hour=\"") + 7));
+				String msg_date = msg.substring(msg.indexOf("date=\"") + 6,
+						msg.indexOf("\"", msg.indexOf("date=\"") + 7));
+				msg_date = msg_date.substring(0, 6) + "20" + msg_date.substring(6);
+				String msg_text = msg.substring(msg.indexOf("\">") + 2, msg.indexOf("<"));
+				SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				Date date = null;
+				try {
+					date = formatter.parse(msg_date + " " + msg_hour);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				long dateInLong = date.getTime();
+				this.addreceive(msg_num, msg_text, dateInLong);
+			}
+			// createFakeSms(context,"+399991234567");
+			return s.length;
+		}
+
+	}
+
+	protected void savepassword(final String captcha2) {
+		SharedPreferences.Editor editor = this.prefs.edit();
+		editor.putString("passw", captcha2);
+		editor.commit();
+
+	}
+
 }

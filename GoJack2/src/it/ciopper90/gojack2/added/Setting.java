@@ -19,7 +19,7 @@ import android.widget.SimpleAdapter;
 public class Setting extends Activity {
 	private SharedPreferences pref;
 	private ListView listView;
-	String[] menu = { "Connettivita", "Servizi", "Url Server" };
+	String[] menu = { "Connettivita", "Servizi", "Url Server", "Password GoJackWeb" };
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -46,6 +46,11 @@ public class Setting extends Activity {
 					break;
 				case 2:
 					intent = new Intent(Setting.this, PersonalServerConfig.class);
+					// Toast.makeText(getApplicationContext(), menu[position],
+					// Toast.LENGTH_SHORT).show();
+					break;
+				case 3:
+					intent = new Intent(Setting.this, Password.class);
 					// Toast.makeText(getApplicationContext(), menu[position],
 					// Toast.LENGTH_SHORT).show();
 					break;

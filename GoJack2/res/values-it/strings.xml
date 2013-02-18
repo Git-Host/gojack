@@ -21,6 +21,7 @@
                Visit http://ub0r.de/translate/smsdroid/it/strings.xml to edit the file.
        -->
 <resources>
+  <string name="salvaPassword">Save Password</string>
   <string name="about_" formatted="false" username="carloraudino@fedoraproject.org" orig="About">Info</string>
   <string name="about_hint" formatted="false" username="carloraudino@fedoraproject.org" orig="About this app">Info sull\'app</string>
   <string name="faq_hint" formatted="false" username="carloraudino@fedoraproject.org" orig="Some tips and tricks, how to set up this app.">Alcuni trucchi e suggerimenti su come impostare l\'applicazione.</string>
@@ -226,4 +227,6 @@ Cliccare per farlo adesso.</string>
   <string name="source_" formatted="false" username="carloraudino@fedoraproject.org" orig="Sourcescode:">Codice sorgente:</string>
   <string name="custom_language_" formatted="false" username="carloraudino@fedoraproject.org" orig="Custom language">Personalizza lingua</string>
   <string name="custom_language_hint" formatted="false" username="carloraudino@fedoraproject.org" orig="Set a custom language.">Imposta una lingua personalizzata.</string>
+  <string name="salvaPassword">Salvare Password</string>
+	
 </resources>

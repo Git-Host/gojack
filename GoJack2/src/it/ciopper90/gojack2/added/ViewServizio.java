@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -321,12 +322,13 @@ public class ViewServizio extends Activity {
 				ViewServizio.pd.setTitle("Update Xml");
 				ViewServizio.pd.setMessage("Update...");
 				ViewServizio.pd.setCancelable(false);
-				pd.show();
+
 				Builder builder = this.createAlertPassword();
 				builder.setPositiveButton("Invia!", new OnClickListener() {
 					public void onClick(final DialogInterface dialog, final int id) {
 						String captcha = ViewServizio.this.text_1.getText().toString();
 						dialog.dismiss();
+						pd.show();
 						ViewServizio.this.password = "&p=" + captcha;
 						new UpdateTask().execute(url + "&p=" + captcha);
 					}
@@ -364,12 +366,13 @@ public class ViewServizio extends Activity {
 					ViewServizio.pd.setTitle("Import Servizi");
 					ViewServizio.pd.setMessage("Connecting...");
 					ViewServizio.pd.setCancelable(false);
-					pd.show();
+					// pd.show();
 					Builder builder = this.createAlertPassword();
 					builder.setPositiveButton("Invia!", new OnClickListener() {
 						public void onClick(final DialogInterface dialog, final int id) {
 							String captcha = ViewServizio.this.text_1.getText().toString();
 							dialog.dismiss();
+							pd.show();
 							ViewServizio.this.password = "&p=" + captcha;
 							new DownTask().execute(url + "&p=" + captcha);
 						}
@@ -398,10 +401,18 @@ public class ViewServizio extends Activity {
 		View layout = inflater.inflate(R.layout.dialog,
 				(ViewGroup) this.findViewById(R.id.layout_root));
 		this.text_1 = (EditText) layout.findViewById(R.id.text);
+		CheckBox cb = (CheckBox) layout.findViewById(R.id.checkBox1);
+		cb.setVisibility(View.GONE);
 		builder = new AlertDialog.Builder(ViewServizio.this);
 		builder.setView(layout);
 		builder.setTitle("Password Web");
-		builder.setCancelable(false);
+		builder.setCancelable(true);
+		builder.setNegativeButton("Annulla", new OnClickListener() {
+			public void onClick(final DialogInterface dialog, final int id) {
+				dialog.dismiss();
+				status = "";
+			}
+		});
 		return builder;
 	}
 

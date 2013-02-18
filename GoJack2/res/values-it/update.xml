@@ -19,46 +19,10 @@
 	-->
 <resources>
 	<string-array name="updates">
-		<item>v1.4: minor changes</item>
-		<item>v1.3.2: fix some FCs, fix dark themed action bar, move ads to message list</item>
-		<item>v1.3.1: fix dark themed action bar, fix FC</item>
-		<item>v1.3: new (tiled) layout for conversations (thx to marek wehmer), update to abs 4.0</item>
-		<item>v1.1.8: fix notification for android 1.6-3.2</item>
-		<item>v1.1.7: UI fixes for HC/ICS</item>
-		<item>v1.1.6: fix FC on android 1.6</item>
-		<item>v1.1.5: fix FC on android 1.6</item>
-		<item>v1.1.5: HC/ICS widget</item>
-		<item>v1.1.4: deactivate Sender if not available</item>
-		<item>v1.1.3: minor UI fix</item>
-		<item>v1.1.2: minor UI fix, fix notification for ICS</item>
-		<item>v1.1.1: minor UI fix</item>
-		<item>v1.1: minor UI fix, show date for messages newer than 1d</item>
-		<item>v1.0: prepare for honeycomp devices, italian translation, fix FC, minor fixes, new bubbles</item>
-		<item>v0.7.3: add sender activity</item>
-		<item>v0.7.2.2: update translations</item>
-		<item>v0.7.2.1: fix non critical FC</item>
-		<item>v0.7.2: decode NCR messages, hide "restore last message", hide sender in chooser, add regex to fix numbers before sending, minor fixes</item>
-		<item>v0.7.1: Fix NPE</item>
-		<item>v0.7: show dialer instead of calling directly (and reduce permissions), send SMS directly, restore last sent message, add gingerbreadish notification icon (by android and sebastian huth), add french translation (Ismael A.)</item>
-		<item>v0.6: new bubbles and notification icons by daniel kalinic, set text color, fix notification timestamp</item>
-		<item>v0.5.4: fix for android 1.5</item>
-		<item>v0.5.3: Fix remove numbers from spamDB, readd widget\'s title and allow to disable it, minor changes</item>
-		<item>v0.5.2: Hide send button, show presence, fix contact names/photos, minor changes, fix scrolling down in MessageList, fix photo in MessageList</item>
-		<item>v0.5.1: Show target app for sending on send button, allow to switch back behavior for answering, fix sort, fix messagelist</item>
-		<item>v0.5: Answer directly in SMSdroid, new titlebars, fix sticky unread messages, speed up db queries, save mms attachments to sd card, fix forwarding with stock messaging app, show full date, import vcards, call from conversation/message</item>
-		<item>v0.2.4: Add Russian translation, set custom locale, fix scroll to bottom</item>
-		<item>v0.2.3.2: another fix for LauncherPRO, start composer as new task, show photo when entering thread directly</item>
-		<item>v0.2.3.1: fix for LauncherPRO</item>
-		<item>v0.2.3: Fix some FCs</item>
-		<item>v0.2.2: Fix hidden conversations with one message</item>
-		<item>v0.2.1: Fix some FCs, add QuickContact to contact\'s picture</item>
-		<item>v0.2: Fix NPE for unavailable conversations, let unread messages unread on conversation close, switch back to internal install due to problems with app/widget, fix scrolling messages when switch orientation, allow to hide sender/text from notification</item>
-		<item>v0.1.6: Fix FC with some numbers in blacklist, show photo in answer button</item>
-		<item>v0.1.5: Fix for smspopup, add spamfilter, allow install on sd card</item>
-		<item>v0.1.4: Add spanish translation</item>
-		<item>v0.1.3: Fix some NPEs, fix download button for picture only mms</item>
-		<item>v0.1.2: Fix some bugs</item>
-		<item>v0.1.1: Fix zombiemessages, mark thread as read on exit, fix some minor bugs</item>
-		<item>v0.1: Fix contact names, fix missing threads, fix some NPEs, catch OOMEs</item>
+		<item>V 2.0.4: aggiunto changelog, correzione bug update servizi, correzione password update servizi, eliminato anche il menu debug che non serviva, inserita la possibilita di scaricare i GoJackMS, inserito bottone in alto vicino a nuovo messaggio per il download dei GoJackMS, insertito il salvataggio della password per il download dei GoJackMS, correzione problema rotazione schermo su device con Jelly Bean(e credo anche per device con android >=4), aggiunta nelle impostazioni la possibilita di inserire o modificare la password di gojack web.questa verra usata per il download dei gojackms</item>
+		<item>V 2.0.3: sistemati errori nel download  dei servizi, aggiunta la segnalazione errore di errore url server, corezzione problema rotazione schermo, cambiato package applicazione cosi puo essere installato assieme ad smsdroid, riorganizzati leggermente i menu standard di smsdroid, aggiornati tutti i link nelle impostazioni..ora rimandano a gojack, messa anche la mia mail a cui contattarmi e il link per segnalare bug su google code</item>
+		<item>V 2.0.2: sistemato inserimento automatico password nel link dei servizi durante l\'importazione, sistemato problema rotazione schermo durante il download dei servizi, sistemato problema rotazione schermo durante inserimento password, corretta la sezione dell\'invio del messaggio risolvendo alcuni problemi di crash</item>
+		<item>v 2.0.1: salvataggio del servizio usato anche quando viene inviato il primo messaggio(prima non lo faceva), corretto problema creazione nuova conversazione se il numero veniva preso dalla rubrica, inserita una prima gestione degli errori</item>
+		<item>V 2.0.0: eliminazione carattere \" \" con \"\", salvataggio dell\'ultimo servizio usato in ogni conversazione, correzione di bug riguardanti il wifi e il modulo 3g su versioni di android >=4, implementazione grazie al software SmsDroid delle conversazioni, eliminate la sezione "generali" delle impostazioni</item>
 	</string-array>
 </resources>
