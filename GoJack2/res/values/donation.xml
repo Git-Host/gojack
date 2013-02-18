@@ -25,7 +25,7 @@
 	<string name="did_paypal_donation">I already did a donation via Paypal</string>
 	<string name="notify_">Forgot to remove the ads?</string>
 
-	<string-array name="donation_messages_market" translatable="false">
+	<string-array name="donation_messages_market">
 		<item>@string/predonate_market</item>
 	</string-array>
 </resources>

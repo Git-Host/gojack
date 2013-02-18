@@ -32,8 +32,4 @@
 		android:title="@string/about_">
 		<extra android:name="resource" android:value="prefs_about" />
 	</header>
-	<header android:fragment="it.ciopper90.gojack2.HeaderPreferenceFragment"
-		android:title="@string/debug_">
-		<extra android:name="resource" android:value="prefs_debug" />
-	</header>
 </preference-headers>

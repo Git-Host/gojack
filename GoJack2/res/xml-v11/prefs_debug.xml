@@ -17,6 +17,8 @@
 		not, see <http://www.gnu.org/licenses/>.
 	-->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceScreen android:key="send_logs"
-		android:title="@string/send_logs_" android:summary="@string/send_logs_hint" />
+	<PreferenceCategory android:title="@string/debug_">
+		<PreferenceScreen android:key="send_logs"
+			android:title="@string/send_logs_" android:summary="@string/send_logs_hint" />
+	</PreferenceCategory>
 </PreferenceScreen>

@@ -18,7 +18,7 @@
     package="it.ciopper90.gojack2"
     android:installLocation="internalOnly"
     android:versionCode="7140002"
-    android:versionName="2.2" >
+    android:versionName="2.0.3" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -93,12 +93,12 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".PreferencesActivity" />
-        <activity android:name=".Setting" />
-        <activity android:name=".PersonalServerConfig" />
-        <activity android:name=".Connettivita" />
-        <activity android:name=".AddScript" />
-        <activity android:name=".AddServizio" />
-        <activity android:name=".ViewServizio" />
+        <activity android:name="it.ciopper90.gojack2.added.Setting" />
+        <activity android:name="it.ciopper90.gojack2.added.PersonalServerConfig" />
+        <activity android:name="it.ciopper90.gojack2.added.Connettivita" />
+        <activity android:name="it.ciopper90.gojack2.added.AddScript" />
+        <activity android:name="it.ciopper90.gojack2.added.AddServizio" />
+        <activity android:name="it.ciopper90.gojack2.added.ViewServizio" />
         <activity android:name=".PreferencesAppearanceActivity" />
         <activity android:name=".PreferencesBehaviorActivity" />
         <activity android:name=".PreferencesNotificationActivity" />
