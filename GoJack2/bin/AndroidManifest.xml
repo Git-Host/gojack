@@ -18,7 +18,7 @@
     package="it.ciopper90.gojack2"
     android:installLocation="internalOnly"
     android:versionCode="7140002"
-    android:versionName="2.0.3" >
+    android:versionName="2.0.4" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -95,6 +95,7 @@
         <activity android:name=".PreferencesActivity" />
         <activity android:name="it.ciopper90.gojack2.added.Setting" />
         <activity android:name="it.ciopper90.gojack2.added.PersonalServerConfig" />
+        <activity android:name="it.ciopper90.gojack2.added.Password" />
         <activity android:name="it.ciopper90.gojack2.added.Connettivita" />
         <activity android:name="it.ciopper90.gojack2.added.AddScript" />
         <activity android:name="it.ciopper90.gojack2.added.AddServizio" />

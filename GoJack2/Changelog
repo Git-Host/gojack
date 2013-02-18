@@ -1,7 +1,13 @@
 V 2.0.4
 correzione bug update servizi
 correzione password update servizi
-//download GoJackMS
+eliminato anche il menu debug che non serviva
+inserita la possibilita di scaricare i GoJackMS
+inserito bottone in alto vicino a nuovo messaggio per il download dei GoJackMS
+insertito il salvataggio della password per il download dei GoJackMS
+correzione problema rotazione schermo su device con Jelly Bean(e credo anche per device con android >=4)
+aggiunta nelle impostazioni la possibilita di inserire o modificare la password di gojack web.
+questa verra usata per il download dei gojackms
 
 V 2.0.3
 sistemati errori nel download  dei servizi

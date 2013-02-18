@@ -19,7 +19,7 @@
 <resources>
 	<string name="app_name">GoJack 2</string>
 	<string name="sender_name">GoJack</string>
-	<string name="app_version">2.0.3</string>
+	<string name="app_version">2.0.4</string>
 	<string name="faq_">FAQ</string>
 	<string name="google_plus_">Google+</string>
 	<string name="twitter_">twitter</string>

@@ -21,6 +21,11 @@
         android:icon="@drawable/ic_menu_compose"
         android:showAsAction="always|never"
         android:title="@string/new_message_"/>
+	<item
+        android:id="@+id/item_download"
+        android:icon="@drawable/ic_menu_download"
+        android:showAsAction="always|never"
+        android:title="@string/download"/>
     <item
         android:id="@+id/item_mark_all_read"
         android:icon="@drawable/ic_menu_mark"

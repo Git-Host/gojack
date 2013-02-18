@@ -17,6 +17,7 @@
 		not, see <http://www.gnu.org/licenses/>.
 	-->
 <resources>
+    <string name="download">Download</string>
 	<string name="about_">About</string>
 	<string name="about_hint">About this app</string>
 	<string name="faq_hint">Some tips and tricks, how to set up this app.</string>
@@ -59,6 +60,7 @@
 	<string name="show_target_app_hint">Show target App used for sending on \"send\" Button.</string>
 	<string name="appearance_">Appearance</string>
 	<string name="theme_">Theme</string>
+	<string name="salvaPassword">Save Password</string>
 	<string name="textsize_">Text size</string>
 	<string name="textsize_hint">Text size in pixels; leave empty for default</string>
 	<string name="textcolor_">Text color</string>
