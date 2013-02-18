@@ -18,7 +18,7 @@
  */
 package it.ciopper90.gojack2;
 
-import it.ciopper90.gojack2.R;
+import it.ciopper90.gojack2.added.Setting;
 
 import java.util.Calendar;
 
@@ -54,7 +54,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.ub0r.android.lib.ChangelogHelper;
-import de.ub0r.android.lib.DonationHelper;
 import de.ub0r.android.lib.Log;
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.lib.apis.Contact;
@@ -269,9 +268,10 @@ public final class ConversationListActivity extends SherlockActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		this.getSupportMenuInflater().inflate(R.menu.conversationlist, menu);
-		if (DonationHelper.hideAds(this)) {
-			menu.removeItem(R.id.item_donate);
-		}
+		/*
+		 * if (DonationHelper.hideAds(this)) {
+		 * menu.removeItem(R.id.item_donate); }
+		 */
 		return true;
 	}
 
@@ -393,11 +393,14 @@ public final class ConversationListActivity extends SherlockActivity implements
 		case R.id.item_service: // start settings activity
 			this.startActivity(new Intent(this, Setting.class));
 			return true;
-		case R.id.item_donate:
-			DonationHelper.showDonationDialog(this, this.getString(R.string.donate),
-					this.getString(R.string.donate_), this.getString(R.string.did_paypal_donation),
-					this.getResources().getStringArray(R.array.donation_messages_market));
-			return true;
+			/*
+			 * case R.id.item_donate: DonationHelper.showDonationDialog(this,
+			 * this.getString(R.string.donate),
+			 * this.getString(R.string.donate_),
+			 * this.getString(R.string.did_paypal_donation),
+			 * this.getResources().
+			 * getStringArray(R.array.donation_messages_market)); return true;
+			 */
 		case R.id.item_delete_all_threads:
 			deleteMessages(this, Uri.parse("content://sms/"), R.string.delete_threads_,
 					R.string.delete_threads_question, null);

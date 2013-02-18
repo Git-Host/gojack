@@ -18,11 +18,12 @@
  */
 package it.ciopper90.gojack2;
 
-
-import it.ciopper90.gojack2.R;
+import it.ciopper90.gojack2.added.Invio;
+import it.ciopper90.gojack2.added.SendSMS;
+import it.ciopper90.gojack2.utils.Dialog;
 import it.ciopper90.gojack2.utils.Servizio;
+import it.ciopper90.gojack2.utils.WSInterface;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -35,8 +36,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,17 +46,13 @@ import android.support.v4.app.FragmentActivity;
 import android.text.ClipboardManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
-import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -90,7 +85,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 
 	/** Ad's unit id. */
 	private static final String ADMOB_PUBID = "a14b9f701ee348f";
-	private ProgressDialog pd = null;
+	private static ProgressDialog pd;
 
 	/** Ad's keywords. */
 	public static final HashSet<String> AD_KEYWORDS = new HashSet<String>();
@@ -180,13 +175,13 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	private boolean needContactUpdate = false;
 	private Invio invio;
 	private String prova;
-	private WorkServizio ws;
-	private static ArrayList<Servizio> service;
+	private String usedservice;
+	private static String errore;
 
 	private Spinner spinner;
 	private SpinnerAdapter spinneradapter;
 	private SendSMS send;
-	private String alert;
+	private static String alert;
 
 	/**
 	 * Get {@link ListView}.
@@ -397,34 +392,53 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		// this.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		this.getSupportActionBar().setDisplayShowHomeEnabled(false);
 
+		this.spinner = WSInterface.setSpinner(this);
+		if (MessageListActivity.alert == null) {
+			MessageListActivity.alert = "";
+		}
 		// this.getSupportActionBar().setIcon(R.drawable.ic_menu_star);
 		// this.getSupportActionBar().
-		this.ws = new WorkServizio(this.getApplicationContext());
+		// this.ws = new WorkServizio(this.getApplicationContext());
 
-		service = this.ws.caricaServizio();
-		this.spinner = new Spinner(this);
-		ArrayList<String> lista = new ArrayList<String>();
-		for (int i = 0; i < service.size(); i++) {
-			lista.add(service.get(i).getName());
-		}
+		// service = this.ws.caricaServizio();
+		// this.spinner = new Spinner(this);
+		// ArrayList<String> lista = new ArrayList<String>();
+		// for (int i = 0; i < service.size(); i++) {
+		// lista.add(service.get(i).getName());
+		// }
 		// lista.add("a");
 		// lista.add("b");
 		// lista.add("c");
 
-		this.spinneradapter = new ArrayAdapter<String>(this, R.layout.textview, lista);
-		this.spinner.setAdapter(this.spinneradapter);
+		// this.spinneradapter = new ArrayAdapter<String>(this,
+		// R.layout.textview, lista);
+		// this.spinner.setAdapter(this.spinneradapter);
 		if (number.contains(" ")) {
 			number = number.replace(" ", "");
 		}
-		String serv = this.ws.ServizioNumero(number);
-		if (serv != null) {
-			int a = lista.indexOf(serv);
-			this.spinner.setSelection(lista.indexOf(serv));
-		}
+		this.spinner.setSelection(WSInterface.PositionServizioNumero(number));
+		// String serv = WSInterface.ServizioNumero(number);
+		// if (serv != null) {
+		// int a = lista.indexOf(serv);
+		// lista.indexOf(serv));
+		// }
 		// TODO attach to an adapter of some sort
 		this.getSupportActionBar().setCustomView(this.spinner);
 		this.getSupportActionBar().setDisplayShowCustomEnabled(true);
 		// this.setContactIcon(contact);
+
+		if (MessageListActivity.alert.equals("captcha")) {
+			this.captcha();// Dialog.RestoreDialog(this, this.alert);
+		} else {
+			if (MessageListActivity.alert.equals("error")) {
+				this.error(MessageListActivity.errore);
+			} else {
+				if (!MessageListActivity.alert.equals("")) {
+					MessageListActivity.pd = Dialog.ProgDialog(this, MessageListActivity.alert);
+					MessageListActivity.pd.show();
+				}
+			}
+		}
 
 		final String body = intent.getStringExtra(Intent.EXTRA_TEXT);
 		if (!TextUtils.isEmpty(body)) {
@@ -848,8 +862,11 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		public void handleMessage(final android.os.Message msg) {
 			Bundle bundle = msg.getData();
 			int cond = bundle.getInt("cond");
+			pd.cancel();
+			pd.dismiss();
 			switch (cond) {
 			case 0:
+				MessageListActivity.this.etText.setText("");
 				MessageListActivity.this.ok();
 				break;
 			case 1:
@@ -873,14 +890,14 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	private void send(final boolean autosend, final boolean showChooser) {
 		Servizio s = null;
 		// String returnString = null;
+		ArrayList<Servizio> service = WSInterface.getService();
+
 		for (int i = 0; i < service.size(); i++) {
 			if (service.get(i).getName() == this.spinner.getSelectedItem().toString()) {
 				s = service.get(i);
 			}
 		}
-		this.pd = new ProgressDialog(MessageListActivity.this);
-		this.pd.setMessage("Invio in corso");
-		this.pd.setCancelable(false);
+		MessageListActivity.pd = Dialog.ProgDialog(this, "Invio in Corso..");
 		// messag="Invio in corso";
 		// this.pd.show();
 		final String text = this.etText.getText().toString().trim();
@@ -888,8 +905,11 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		// Servizio s = new Servizio("free", "cADR8jqr80ku$Fw@fXMY", "", "", "",
 		// "http://ciopper90.altervista.org/php5/gofree/gojack.php", "", "");
 
-		this.send = new SendSMS(s, recipient, text, this.getApplicationContext(), this.pd);
+		this.send = new SendSMS(s, recipient, text, this.getApplicationContext(),
+				MessageListActivity.pd);
 		this.send.go(this.effettuato);
+		MessageListActivity.alert = "Invio in Corso..";
+		this.usedservice = (String) this.spinner.getSelectedItem();
 		// this.ws.fatto();
 		// this.pd.cancel();
 		// this.pd.dismiss();
@@ -910,18 +930,13 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	}
 
 	private void error(final String string) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Errore");
-		// title="errore";
-		// alert=prova;
-		// prova=prova.substring(prova.indexOf("<txt>")+5,
-		// prova.indexOf("</txt>"));
-		builder.setMessage(string);
-		builder.setCancelable(false);
+		MessageListActivity.errore = string;
+		AlertDialog.Builder builder = Dialog.ErrorDialog(this, string);
+		MessageListActivity.alert = "error";
 		builder.setNegativeButton("Chiudi", new AlertDialog.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
 				dialog.dismiss();
-				// SenderActivity.this.alert = "";
+				MessageListActivity.alert = "";
 			}
 		});
 		builder.show();
@@ -929,49 +944,25 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	}
 
 	protected void captcha() {
-		AlertDialog alertDialog;
-		AlertDialog.Builder builder;
-		LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.dialog,
-				(ViewGroup) this.findViewById(R.id.layout_root));
-		ImageView image = (ImageView) layout.findViewById(R.id.image);
-		Bitmap bMap = null;
-		try {
-			bMap = BitmapFactory.decodeStream(this.openFileInput("captcha.jpg"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		final EditText text = (EditText) layout.findViewById(R.id.text);
-		DisplayMetrics metrics = new DisplayMetrics();
-		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		Log.d("misure",
-				"image " + bMap.getHeight() + ":" + bMap.getWidth() + " spazio "
-						+ image.getHeight() + " " + image.getWidth());
-		double rapporto = bMap.getWidth() / (double) bMap.getHeight();
-		bMap = Bitmap.createScaledBitmap(bMap, (int) (metrics.widthPixels * 0.9),
-				(int) (((int) (metrics.widthPixels * 0.9)) / rapporto), true);
-		image.setImageBitmap(bMap);
-		builder = new AlertDialog.Builder(this);
-		builder.setView(layout);
-		builder.setCancelable(false);
-		this.pd = new ProgressDialog(this);
+		AlertDialog.Builder builder = Dialog.RestoreDialog(this, "captcha");
+		MessageListActivity.alert = "captcha";
+		MessageListActivity.pd = new ProgressDialog(this);
 		builder.setPositiveButton("Invia!", new DialogInterface.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
-				String captcha = text.getText().toString();
-				MessageListActivity.this.send.captcha(captcha, MessageListActivity.this.pd);
+				String captcha = Dialog.getCaptcha();
+				MessageListActivity.this.send.captcha(captcha, MessageListActivity.pd);
 				dialog.dismiss();
-				MessageListActivity.this.alert = "";
+				MessageListActivity.alert = "";
 			}
 		});
 		builder.setNegativeButton("Annulla!", new DialogInterface.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
 				dialog.dismiss();
 				// annullare realmente l'invio
-				MessageListActivity.this.alert = "";
+				MessageListActivity.alert = "";
 			}
 		});
-		alertDialog = builder.create();
+		builder.create();
 		builder.show();
 
 	}
@@ -982,7 +973,16 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		if (number.contains(" ")) {
 			number = number.replace(" ", "");
 		}
-		this.ws.saveService(number, (String) this.spinner.getSelectedItem());
+		WSInterface.saveService(number, this.usedservice);
+		MessageListActivity.alert = "";
+	}
+
+	@Override
+	protected void onDestroy() {
+		/*
+		 * if (this.pd != null) { this.pd.cancel(); this.pd.dismiss(); }
+		 */
+		super.onDestroy();
 	}
 
 }

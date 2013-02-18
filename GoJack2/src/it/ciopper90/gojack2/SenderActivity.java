@@ -3,37 +3,29 @@
  */
 package it.ciopper90.gojack2;
 
-
-import it.ciopper90.gojack2.R;
+import it.ciopper90.gojack2.added.SendSMS;
+import it.ciopper90.gojack2.utils.Dialog;
 import it.ciopper90.gojack2.utils.Servizio;
+import it.ciopper90.gojack2.utils.WSInterface;
 
-import java.io.FileNotFoundException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.BaseColumns;
 import android.text.ClipboardManager;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -48,28 +40,32 @@ import de.ub0r.android.lib.apis.ContactsWrapper;
  * 
  * @author flx
  */
+@SuppressLint("HandlerLeak")
+@SuppressWarnings("deprecation")
 public final class SenderActivity extends SherlockActivity implements OnClickListener {
 	/** Tag for output. */
 	private static final String TAG = "send";
 
 	/** {@link Uri} for saving messages. */
-	private static final Uri URI_SMS = Uri.parse("content://sms");
+	// private static final Uri URI_SMS = Uri.parse("content://sms");
 	/** {@link Uri} for saving sent messages. */
 	public static final Uri URI_SENT = Uri.parse("content://sms/sent");
 	/** Projection for getting the id. */
-	private static final String[] PROJECTION_ID = new String[] { BaseColumns._ID };
+	// private static final String[] PROJECTION_ID = new String[] {
+	// BaseColumns._ID };
 	/** SMS DB: address. */
-	private static final String ADDRESS = "address";
+	// private static final String ADDRESS = "address";
 	/** SMS DB: read. */
-	private static final String READ = "read";
+	// private static final String READ = "read";
 	/** SMS DB: type. */
 	public static final String TYPE = "type";
+	public static String errore;
 	/** SMS DB: body. */
-	private static final String BODY = "body";
+	// private static final String BODY = "body";
 	/** SMS DB: date. */
-	private static final String DATE = "date";
+	// private static final String DATE = "date";
 
-	private ProgressDialog pd = null;
+	private static ProgressDialog pd = null;
 
 	/** Message set action. */
 	public static final String MESSAGE_SENT_ACTION = "com.android.mms.transaction.MESSAGE_SENT";
@@ -77,18 +73,14 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	/** Hold recipient and text. */
 	private String to, text;
 	/** {@link ClipboardManager}. */
-	@SuppressWarnings("deprecation")
 	private ClipboardManager cbmgr;
-	private String result;
-	private Invio invio;
-	private String prova;
-	private WorkServizio ws;
-	private static ArrayList<Servizio> service;
+	// private String result;
+	// private Invio invio;
+	private String usedservice;
 
 	private Spinner spinner;
-	private SpinnerAdapter spinneradapter;
 	private SendSMS send;
-	private String alert;
+	private static String alert;
 
 	/**
 	 * {@inheritDoc}
@@ -96,6 +88,9 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (SenderActivity.alert == null) {
+			SenderActivity.alert = "";
+		}
 		this.handleIntent(this.getIntent());
 	}
 
@@ -114,7 +109,6 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	 * @param intent
 	 *            {@link Intent}
 	 */
-	@SuppressWarnings("deprecation")
 	private void handleIntent(final Intent intent) {
 		if (this.parseIntent(intent)) {
 			this.setTheme(android.R.style.Theme_Translucent_NoTitleBar);
@@ -158,24 +152,26 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 
 		this.getSupportActionBar().setDisplayShowHomeEnabled(false);
 
-		// this.getSupportActionBar().setIcon(R.drawable.ic_menu_star);
-		// this.getSupportActionBar().
-		this.ws = new WorkServizio(this.getApplicationContext());
+		// aggiunge spinner alla ActionBar
 
-		service = this.ws.caricaServizio();
-		this.spinner = new Spinner(this);
-		ArrayList<String> lista = new ArrayList<String>();
-		for (int i = 0; i < service.size(); i++) {
-			lista.add(service.get(i).getName());
-		}
-		// lista.add("a");
-		// lista.add("b");
-		// lista.add("c");
+		// this.spinner.setAdapter(WSInterface.setSpinner(this));
+		this.spinner = WSInterface.setSpinner(this);
 
-		this.spinneradapter = new ArrayAdapter<String>(this, R.layout.textview, lista);
-		this.spinner.setAdapter(this.spinneradapter);
 		this.getSupportActionBar().setCustomView(this.spinner);
 		this.getSupportActionBar().setDisplayShowCustomEnabled(true);
+
+		if (SenderActivity.alert.equals("captcha")) {
+			this.captcha();// Dialog.RestoreDialog(this, this.alert);
+		} else {
+			if (SenderActivity.alert.equals("error")) {
+				this.error(errore);
+			} else {
+				if (!SenderActivity.alert.equals("")) {
+					SenderActivity.pd = Dialog.ProgDialog(this, SenderActivity.alert);
+					SenderActivity.pd.show();
+				}
+			}
+		}
 
 	}
 
@@ -250,7 +246,6 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onClick(final View v) {
 		switch (v.getId()) {
@@ -304,6 +299,8 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 		public void handleMessage(final android.os.Message msg) {
 			Bundle bundle = msg.getData();
 			int cond = bundle.getInt("cond");
+			pd.cancel();
+			pd.dismiss();
 			switch (cond) {
 			case 0:
 				SenderActivity.this.ok();
@@ -328,16 +325,16 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	 */
 	private void send(final boolean autosend, final boolean showChooser) {
 		Servizio s = null;
-		this.pd = new ProgressDialog(SenderActivity.this);
+		// this.pd = new ProgressDialog(SenderActivity.this);
 		// String returnString = null;
+		ArrayList<Servizio> service = WSInterface.getService();
 		for (int i = 0; i < service.size(); i++) {
 			if (service.get(i).getName() == this.spinner.getSelectedItem().toString()) {
 				s = service.get(i);
 			}
 		}
-		this.pd.setMessage("Invio in corso");
-		this.pd.setCancelable(false);
-		// messag="Invio in corso";
+		// this.pd.setMessage("Invio in corso");
+		// this.pd.setCancelable(false);
 		// this.pd.show();
 		EditText et = (EditText) this.findViewById(R.id.text);
 		this.text = et.getText().toString();
@@ -346,9 +343,12 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 
 		// Servizio s = new Servizio("free", "cADR8jqr80ku$Fw@fXMY", "", "", "",
 		// "http://ciopper90.altervista.org/php5/gofree/gojack.php", "", "");
-
-		this.send = new SendSMS(s, this.to, this.text, this.getApplicationContext(), this.pd);
+		SenderActivity.pd = Dialog.ProgDialog(this, "Invio in Corso..");
+		this.send = new SendSMS(s, this.to, this.text, this.getApplicationContext(),
+				SenderActivity.pd);
 		this.send.go(this.effettuato);
+		SenderActivity.alert = "Invio in Corso..";
+		this.usedservice = (String) this.spinner.getSelectedItem();
 		// this.ws.fatto();
 		// this.pd.cancel();
 		// this.pd.dismiss();
@@ -369,18 +369,13 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	}
 
 	protected void error(final String string) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Errore");
-		// title="errore";
-		// alert=prova;
-		// prova=prova.substring(prova.indexOf("<txt>")+5,
-		// prova.indexOf("</txt>"));
-		builder.setMessage(string);
-		builder.setCancelable(false);
+		errore = string;
+		AlertDialog.Builder builder = Dialog.ErrorDialog(this, string);
+		SenderActivity.alert = "error";
 		builder.setNegativeButton("Chiudi", new AlertDialog.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
 				dialog.dismiss();
-				// SenderActivity.this.alert = "";
+				SenderActivity.alert = "";
 			}
 		});
 		builder.show();
@@ -388,49 +383,45 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	}
 
 	protected void captcha() {
-		AlertDialog alertDialog;
-		AlertDialog.Builder builder;
-		LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.dialog,
-				(ViewGroup) this.findViewById(R.id.layout_root));
-		ImageView image = (ImageView) layout.findViewById(R.id.image);
-		Bitmap bMap = null;
-		try {
-			bMap = BitmapFactory.decodeStream(this.openFileInput("captcha.jpg"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		final EditText text = (EditText) layout.findViewById(R.id.text);
-		DisplayMetrics metrics = new DisplayMetrics();
-		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		Log.d("misure",
-				"image " + bMap.getHeight() + ":" + bMap.getWidth() + " spazio "
-						+ image.getHeight() + " " + image.getWidth());
-		double rapporto = bMap.getWidth() / (double) bMap.getHeight();
-		bMap = Bitmap.createScaledBitmap(bMap, (int) (metrics.widthPixels * 0.9),
-				(int) (((int) (metrics.widthPixels * 0.9)) / rapporto), true);
-		image.setImageBitmap(bMap);
-		builder = new AlertDialog.Builder(this);
-		builder.setView(layout);
-		builder.setCancelable(false);
-		this.pd = new ProgressDialog(this);
+		AlertDialog.Builder builder = Dialog.RestoreDialog(this, "captcha");
+		SenderActivity.alert = "captcha";
+		/*
+		 * LayoutInflater inflater = (LayoutInflater)
+		 * this.getSystemService(LAYOUT_INFLATER_SERVICE); View layout =
+		 * inflater.inflate(R.layout.dialog, (ViewGroup)
+		 * this.findViewById(R.id.layout_root)); ImageView image = (ImageView)
+		 * layout.findViewById(R.id.image); Bitmap bMap = null; try { bMap =
+		 * BitmapFactory.decodeStream(this.openFileInput("captcha.jpg")); }
+		 * catch (FileNotFoundException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } final EditText text = (EditText)
+		 * layout.findViewById(R.id.text); DisplayMetrics metrics = new
+		 * DisplayMetrics();
+		 * this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		 * Log.d("misure", "image " + bMap.getHeight() + ":" + bMap.getWidth() +
+		 * " spazio " + image.getHeight() + " " + image.getWidth()); double
+		 * rapporto = bMap.getWidth() / (double) bMap.getHeight(); bMap =
+		 * Bitmap.createScaledBitmap(bMap, (int) (metrics.widthPixels * 0.9),
+		 * (int) (((int) (metrics.widthPixels * 0.9)) / rapporto), true);
+		 * image.setImageBitmap(bMap); builder = new AlertDialog.Builder(this);
+		 * builder.setView(layout); builder.setCancelable(false);
+		 */
+		SenderActivity.pd = new ProgressDialog(this);
 		builder.setPositiveButton("Invia!", new DialogInterface.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
-				String captcha = text.getText().toString();
-				SenderActivity.this.send.captcha(captcha, SenderActivity.this.pd);
+				String captcha = Dialog.getCaptcha();
+				SenderActivity.this.send.captcha(captcha, SenderActivity.pd);
 				dialog.dismiss();
-				SenderActivity.this.alert = "";
+				SenderActivity.alert = "";
 			}
 		});
 		builder.setNegativeButton("Annulla!", new DialogInterface.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
 				dialog.dismiss();
 				// annullare realmente l'invio
-				SenderActivity.this.alert = "";
+				SenderActivity.alert = "";
 			}
 		});
-		alertDialog = builder.create();
+		builder.create();
 		builder.show();
 
 	}
@@ -448,7 +439,8 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 		if (this.to.contains(",")) {
 			this.to = this.to.replace(",", "");
 		}
-		this.ws.saveService(this.to, (String) this.spinner.getSelectedItem());
+		WSInterface.saveService(this.to, this.usedservice);
+		SenderActivity.alert = "";
 		this.finish();
 	}
 

@@ -18,8 +18,6 @@
  */
 package it.ciopper90.gojack2;
 
-import it.ciopper90.gojack2.R;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -272,7 +270,7 @@ public class PreferencesActivity extends PreferenceActivity implements IPreferen
 		super.onCreate(savedInstanceState);
 		this.addPreferencesFromResource(R.xml.prefs_appearance_behavior);
 		this.addPreferencesFromResource(R.xml.prefs_about);
-		this.addPreferencesFromResource(R.xml.prefs_debug);
+		// this.addPreferencesFromResource(R.xml.prefs_debug);
 
 		registerOnPreferenceClickListener(this);
 	}

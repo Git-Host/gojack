@@ -951,15 +951,14 @@ containing a value of this type.
         public static final int icon=0x7f05006a;
         public static final int image=0x7f05004b;
         public static final int inout=0x7f050054;
-        public static final int item_answer=0x7f050071;
-        public static final int item_call=0x7f050072;
+        public static final int item_answer=0x7f050070;
+        public static final int item_call=0x7f050071;
         public static final int item_compose=0x7f05006b;
         public static final int item_delete_all_threads=0x7f05006d;
-        public static final int item_delete_thread=0x7f050073;
-        public static final int item_donate=0x7f050070;
+        public static final int item_delete_thread=0x7f050072;
         public static final int item_mark_all_read=0x7f05006c;
-        public static final int item_restore=0x7f050074;
-        public static final int item_send=0x7f050075;
+        public static final int item_restore=0x7f050073;
+        public static final int item_send=0x7f050074;
         public static final int item_service=0x7f05006f;
         public static final int item_settings=0x7f05006e;
         public static final int label=0x7f050069;
@@ -1413,12 +1412,15 @@ containing a value of this type.
         public static final int appwidget_provider=0x7f040000;
         public static final int preference_headers=0x7f040001;
         public static final int prefs_about=0x7f040002;
-        public static final int prefs_appearance=0x7f040003;
-        public static final int prefs_appearance_behavior=0x7f040004;
-        public static final int prefs_behavior=0x7f040005;
-        public static final int prefs_debug=0x7f040006;
-        public static final int prefs_notification=0x7f040007;
-        public static final int searchable=0x7f040008;
+        public static final int prefs_about_1=0x7f040003;
+        public static final int prefs_about_a=0x7f040004;
+        public static final int prefs_about_back=0x7f040005;
+        public static final int prefs_appearance=0x7f040006;
+        public static final int prefs_appearance_behavior=0x7f040007;
+        public static final int prefs_behavior=0x7f040008;
+        public static final int prefs_debug=0x7f040009;
+        public static final int prefs_notification=0x7f04000a;
+        public static final int searchable=0x7f04000b;
     }
     public static final class styleable {
         /**  Attributes used to style the Action Bar. 
@@ -2364,7 +2366,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          */
         public static final int[] SherlockSpinner = {
             0x010100af, 0x01010175, 0x01010176, 0x0101017b,
-            0x01010262, 0x010102ac, 0x010102ad, 0x010103ef
+            0x01010262, 0x010102ac, 0x010102ad, 0x01010411
         };
         /**
           <p>

@@ -69,7 +69,7 @@ import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 
-@SuppressLint("HandlerLeak")
+@SuppressLint({ "HandlerLeak", "SimpleDateFormat" })
 public class MainActivity extends Activity implements TextWatcher, OnItemSelectedListener, OnMenuItemClickListener{
 
 	final static int RQS_PICK_CONTACT = 0;
@@ -298,44 +298,6 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		registerForContextMenu(testo);
 		registerForContextMenu(number);
 
-		showRows(this.getApplicationContext(), Uri.parse("content://sms/"));
-
-	}
-
-
-
-	void showRows(final Context context, final Uri u) {
-		Uri mSmsQueryUri = Uri.parse("content://sms/");
-		//String columns[] = new String[] {"person", "address", "body", "date","status"};
-		String sortOrder = "date ASC";
-
-		ContentResolver mContentResolver = context.getContentResolver();
-		// Run query and check the result
-		try {
-			cursor = mContentResolver.query(mSmsQueryUri, null, null, null, sortOrder);
-			Log.i("message", "yep" + "# elementi di cursor: " + cursor.getCount() );
-
-			cursor.moveToFirst();
-			while( cursor != null && cursor.isAfterLast() == false )
-			{       
-				int i=0;
-				String c="",d="";
-				for(int h=0;h<cursor.getColumnCount();h++){
-					c=c+cursor.getColumnName(i)+" | ";
-					d=d+cursor.getString(i)+" | ";
-					i++;
-				}
-				cursor.moveToNext();
-
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			//   Log.i(LOG, LOG_PREFIX + "Exception:" + e.getMessage());
-		} finally {
-			cursor.close();
-		}
-
 	}
 
 	protected boolean Controlla() {
@@ -348,6 +310,7 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -809,6 +772,7 @@ public class MainActivity extends Activity implements TextWatcher, OnItemSelecte
 		return super.onContextItemSelected(item);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void processIntentData(Intent intent)
 	{
 		if (null == intent) return;
