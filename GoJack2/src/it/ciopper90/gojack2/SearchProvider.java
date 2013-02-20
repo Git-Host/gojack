@@ -38,6 +38,7 @@ public final class SearchProvider extends ContentProvider {
 	static final String TAG = "sp";
 
 	/** Authority. */
+	@SuppressWarnings("unused")
 	private static final String AUTHORITY = "it.ciopper90.gojack2.SearchProvider";
 
 	/** {@link Uri} to messages. */

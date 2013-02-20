@@ -18,7 +18,6 @@
  */
 package it.ciopper90.gojack2;
 
-import it.ciopper90.gojack2.added.Invio;
 import it.ciopper90.gojack2.added.SendSMS;
 import it.ciopper90.gojack2.utils.Dialog;
 import it.ciopper90.gojack2.utils.Servizio;
@@ -27,6 +26,7 @@ import it.ciopper90.gojack2.utils.WSInterface;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -53,13 +53,11 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,7 +65,6 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
-import de.ub0r.android.lib.DonationHelper;
 import de.ub0r.android.lib.Log;
 import de.ub0r.android.lib.Utils;
 import de.ub0r.android.lib.apis.Contact;
@@ -78,14 +75,12 @@ import de.ub0r.android.lib.apis.ContactsWrapper;
  * 
  * @author flx
  */
+@SuppressLint("HandlerLeak")
+@SuppressWarnings("deprecation")
 public class MessageListActivity extends SherlockActivity implements OnItemClickListener,
 		OnItemLongClickListener, OnClickListener, OnLongClickListener {
 	/** Tag for output. */
 	private static final String TAG = "ml";
-
-	/** Ad's unit id. */
-	private static final String ADMOB_PUBID = "a14b9f701ee348f";
-	private static ProgressDialog pd;
 
 	/** Ad's keywords. */
 	public static final HashSet<String> AD_KEYWORDS = new HashSet<String>();
@@ -132,7 +127,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	private static final int WHICH_DELETE = 7;
 
 	/** Package name for System's chooser. */
-	private static String chooserPackage = null;
+	// private static String chooserPackage = null;
 
 	/** Used {@link Uri}. */
 	private Uri uri;
@@ -149,9 +144,8 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	private boolean markedUnread = false;
 
 	/** {@link EditText} holding text. */
-	private EditText etText;
+	private static EditText etText;
 	/** {@link ClipboardManager}. */
-	@SuppressWarnings("deprecation")
 	private ClipboardManager cbmgr;
 
 	/** Enable autosend. */
@@ -173,14 +167,13 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	private boolean showContactItem = false;
 	/** True, to update {@link Contact}'s photo. */
 	private boolean needContactUpdate = false;
-	private Invio invio;
-	private String prova;
-	private String usedservice;
+	// private String prova;
+	private static String usedservice;
 	private static String errore;
-
+	private static ProgressDialog pd;
 	private Spinner spinner;
-	private SpinnerAdapter spinneradapter;
-	private SendSMS send;
+	// private SpinnerAdapter spinneradapter;
+	private static SendSMS send;
 	private static String alert;
 
 	/**
@@ -205,7 +198,6 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public final void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -232,7 +224,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		}
 
 		this.cbmgr = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
-		this.etText = (EditText) this.findViewById(R.id.text);
+		MessageListActivity.etText = (EditText) this.findViewById(R.id.text);
 
 		if (!this.showTextField) {
 			this.findViewById(R.id.text_layout).setVisibility(View.GONE);
@@ -249,8 +241,8 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		this.findViewById(R.id.text_paste).setOnClickListener(this);
 		this.textWatcher = new MyTextWatcher(this, (TextView) this.findViewById(R.id.text_paste),
 				(TextView) this.findViewById(R.id.text_));
-		this.etText.addTextChangedListener(this.textWatcher);
-		this.textWatcher.afterTextChanged(this.etText.getEditableText());
+		MessageListActivity.etText.addTextChangedListener(this.textWatcher);
+		this.textWatcher.afterTextChanged(MessageListActivity.etText.getEditableText());
 
 		this.longItemClickDialog[WHICH_MARK_UNREAD] = this.getString(R.string.mark_unread_);
 		this.longItemClickDialog[WHICH_REPLY] = this.getString(R.string.reply);
@@ -258,7 +250,6 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		this.longItemClickDialog[WHICH_COPY_TEXT] = this.getString(R.string.copy_text_);
 		this.longItemClickDialog[WHICH_VIEW_DETAILS] = this.getString(R.string.view_details_);
 		this.longItemClickDialog[WHICH_DELETE] = this.getString(R.string.delete_message_);
-		this.invio = new Invio();
 		// this.longItemClickDialog[WHICH_SPEAK] =
 		// this.getString(R.string.speak_);
 
@@ -442,7 +433,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 
 		final String body = intent.getStringExtra(Intent.EXTRA_TEXT);
 		if (!TextUtils.isEmpty(body)) {
-			this.etText.setText(body);
+			MessageListActivity.etText.setText(body);
 		}
 
 		this.setRead();
@@ -516,7 +507,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	@Override
 	protected final void onResume() {
 		super.onResume();
-		boolean noAds = DonationHelper.hideAds(this);
+		// boolean noAds = DonationHelper.hideAds(this);
 		// if (!noAds) {
 		// Ads.loadAd(this, R.id.ad, ADMOB_PUBID, AD_KEYWORDS);
 		// }
@@ -526,7 +517,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		lv.setAdapter(new MessageAdapter(this, this.uri));
 		this.markedUnread = false;
 
-		final Button btn = (Button) this.findViewById(R.id.send_);
+		// final Button btn = (Button) this.findViewById(R.id.send_);
 		// if (this.showTextField) {
 		// final Intent i = this.buildIntent(this.enableAutosend, false);
 		// final PackageManager pm = this.getPackageManager();
@@ -625,8 +616,8 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 					+ this.conv.getContact().getNumber())));
 			return true;
 		case R.id.item_restore:
-			this.etText.setText(PreferenceManager.getDefaultSharedPreferences(this).getString(
-					PreferencesActivity.PREFS_BACKUPLASTTEXT, null));
+			MessageListActivity.etText.setText(PreferenceManager.getDefaultSharedPreferences(this)
+					.getString(PreferencesActivity.PREFS_BACKUPLASTTEXT, null));
 			return true;
 			// case R.id.item_contact:
 			// if (this.conv != null && this.contactItem != null) {
@@ -682,7 +673,6 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 			items[WHICH_FORWARD] = context.getString(R.string.send_draft_);
 		}
 		builder.setItems(items, new DialogInterface.OnClickListener() {
-			@SuppressWarnings("deprecation")
 			@Override
 			public void onClick(final DialogInterface dialog, final int which) {
 				Intent i = null;
@@ -801,7 +791,6 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("deprecation")
 	public final void onClick(final View v) {
 		switch (v.getId()) {
 		case R.id.send_:
@@ -809,7 +798,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 			return;
 		case R.id.text_paste:
 			final CharSequence s = this.cbmgr.getText();
-			this.etText.setText(s);
+			MessageListActivity.etText.setText(s);
 			return;
 		default:
 			return;
@@ -866,7 +855,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 			pd.dismiss();
 			switch (cond) {
 			case 0:
-				MessageListActivity.this.etText.setText("");
+				MessageListActivity.etText.setText("");
 				MessageListActivity.this.ok();
 				break;
 			case 1:
@@ -900,16 +889,15 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		MessageListActivity.pd = Dialog.ProgDialog(this, "Invio in Corso..");
 		// messag="Invio in corso";
 		// this.pd.show();
-		final String text = this.etText.getText().toString().trim();
+		final String text = MessageListActivity.etText.getText().toString().trim();
 		final String recipient = this.conv.getContact().getNumber();
 		// Servizio s = new Servizio("free", "cADR8jqr80ku$Fw@fXMY", "", "", "",
 		// "http://ciopper90.altervista.org/php5/gofree/gojack.php", "", "");
 
-		this.send = new SendSMS(s, recipient, text, this.getApplicationContext(),
-				MessageListActivity.pd);
-		this.send.go(this.effettuato);
+		MessageListActivity.send = new SendSMS(s, recipient, text, this, MessageListActivity.pd);
+		MessageListActivity.send.go(this.effettuato);
 		MessageListActivity.alert = "Invio in Corso..";
-		this.usedservice = (String) this.spinner.getSelectedItem();
+		MessageListActivity.usedservice = (String) this.spinner.getSelectedItem();
 		// this.ws.fatto();
 		// this.pd.cancel();
 		// this.pd.dismiss();
@@ -950,7 +938,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		builder.setPositiveButton("Invia!", new DialogInterface.OnClickListener() {
 			public void onClick(final DialogInterface dialog, final int id) {
 				String captcha = Dialog.getCaptcha();
-				MessageListActivity.this.send.captcha(captcha, MessageListActivity.pd);
+				MessageListActivity.send.captcha(captcha, MessageListActivity.pd);
 				dialog.dismiss();
 				MessageListActivity.alert = "";
 			}
@@ -968,12 +956,12 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	}
 
 	public void ok() {
-		this.etText.setText("");
+		MessageListActivity.etText.setText("");
 		String number = this.conv.getContact().getNumber();
 		if (number.contains(" ")) {
 			number = number.replace(" ", "");
 		}
-		WSInterface.saveService(number, this.usedservice);
+		WSInterface.saveService(number, MessageListActivity.usedservice);
 		MessageListActivity.alert = "";
 	}
 

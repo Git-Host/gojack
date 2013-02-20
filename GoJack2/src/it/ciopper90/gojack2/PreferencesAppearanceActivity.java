@@ -18,7 +18,6 @@
  */
 package it.ciopper90.gojack2;
 
-import it.ciopper90.gojack2.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +36,7 @@ public final class PreferencesAppearanceActivity extends PreferenceActivity impl
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

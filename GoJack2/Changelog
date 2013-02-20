@@ -1,3 +1,11 @@
+V 2.0.5
+correzione piccoli bug riguardanti il download dei gojackms su android >4
+correzione di un errore che riguardava la rotazione dello schermo durante l'invio di un messaggio su android >4
+
+
+inserita la possibilita di scaricare i Free+
+aggiunto il campo per l'inserimento dell'indirizzo wap di freesmee(nel caso uno voglia scaricare anche i free+)
+
 V 2.0.4
 correzione bug update servizi
 correzione password update servizi

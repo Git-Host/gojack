@@ -104,7 +104,7 @@ public final class ChangelogHelper {
 		}
 
 		String[] changes = context.getResources().getStringArray(resChanges);
-		String[] notes = resNotes > 0 ? context.getResources().getStringArray(resNotes) : null;
+		// String[] notes = resNotes > 0 ? context.getResources().getStringArray(resNotes) : null;
 
 		final SpannableStringBuilder sb = new SpannableStringBuilder();
 		/*
@@ -125,7 +125,7 @@ public final class ChangelogHelper {
 		}
 		sb.setSpan(new RelativeSizeSpan(0.75f), 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 		changes = null;
-		notes = null;
+		// notes = null;
 
 		AlertDialog.Builder b = new AlertDialog.Builder(context);
 		b.setTitle(title);

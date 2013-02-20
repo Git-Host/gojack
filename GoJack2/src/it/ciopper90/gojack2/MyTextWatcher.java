@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.TextView;
 
+@SuppressWarnings("deprecation")
 public final class MyTextWatcher implements TextWatcher {
 
 	/** Minimum length for showing sms length. */

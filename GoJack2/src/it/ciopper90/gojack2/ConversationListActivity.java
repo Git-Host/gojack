@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -81,16 +82,18 @@ import de.ub0r.android.lib.apis.ContactsWrapper;
  * 
  * @author flx
  */
+@SuppressLint("SimpleDateFormat")
 public final class ConversationListActivity extends SherlockActivity implements
 		OnItemClickListener, OnItemLongClickListener {
 	/** Tag for output. */
 	public static final String TAG = "main";
 	/** mie variabili */
 	private Context context;
-	private ProgressDialog pd;
+	private static ProgressDialog pd;
 	private SharedPreferences prefs;
 	private static String alert;
 	private static String url;
+	private static String servizio;
 
 	/** ORIG_URI to resolve. */
 	static final Uri URI = Uri.parse("content://mms-sms/conversations/");
@@ -281,8 +284,13 @@ public final class ConversationListActivity extends SherlockActivity implements
 			this.CreateDialog();
 		} else {
 			if (!alert.equals("")) {
-				this.pd = ProgressDialog
-						.show(this.context, "Download GoJackMS", alert, true, false);
+				if (servizio.equals("gojack")) {
+					ConversationListActivity.pd = ProgressDialog.show(this.context,
+							"Download GoJackMS", alert, true, false);
+				} else {
+					ConversationListActivity.pd = ProgressDialog.show(this.context,
+							"Download Free+", alert, true, false);
+				}
 			}
 		}
 
@@ -453,7 +461,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 					Toast.makeText(this.getApplicationContext(),
 							"Inserire URL al file gojack.php come URL preferito",
 							Toast.LENGTH_SHORT).show();
-					this.pd.dismiss();
+					ConversationListActivity.pd.dismiss();
 				} else {
 					if (text.indexOf("?") == -1) {
 						text = text + "?ricez=1";
@@ -468,8 +476,9 @@ public final class ConversationListActivity extends SherlockActivity implements
 						this.CreateDialog();
 					} else {
 						alert = "Connecting...";
-						this.pd = ProgressDialog.show(this.context, "Download GoJackMS",
-								"Connecting...", true, false);
+						servizio = "gojack";
+						ConversationListActivity.pd = ProgressDialog.show(this.context,
+								"Download GoJackMS", "Connecting...", true, false);
 						DownTask task = new DownTask();
 						String password = "&p=" + this.prefs.getString("passw", null);
 						task.execute(url + password);
@@ -502,7 +511,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 			public void onClick(final DialogInterface dialog, final int id) {
 				String captcha = text_1.getText().toString();
 				dialog.dismiss();
-				ConversationListActivity.this.pd = ProgressDialog.show(
+				ConversationListActivity.pd = ProgressDialog.show(
 						ConversationListActivity.this.context, "Download GoJackMS",
 						"Connecting...", true, false);
 				alert = "Connecting...";
@@ -733,14 +742,12 @@ public final class ConversationListActivity extends SherlockActivity implements
 		@Override
 		protected void onProgressUpdate(final String... values) {
 			// aggiorno la progress dialog
-			ConversationListActivity.this.pd.setMessage(values[0]);
+			ConversationListActivity.pd.setMessage(values[0]);
 			alert = values[0];
 		}
 
 		@Override
 		protected void onPostExecute(final String result) {
-			// chiudo la progress dialog
-			ConversationListActivity.this.pd.dismiss();
 
 			Vibrator v = (Vibrator) ConversationListActivity.this
 					.getSystemService(Context.VIBRATOR_SERVICE);
@@ -755,26 +762,23 @@ public final class ConversationListActivity extends SherlockActivity implements
 			 */// operazioni di chiusura
 			Toast.makeText(ConversationListActivity.this.context, result, Toast.LENGTH_SHORT)
 					.show();
+
+			// if (!ConversationListActivity.this.prefs.getString("wap",
+			// "").equals("")) {
+			// new DownFreeTask().execute();
+			// alert = "Import";
+			// ConversationListActivity.pd.setTitle("Download Free+");
+			// servizio = "free";
+			// } else {
+			// chiudo la progress dialog
+			ConversationListActivity.pd.dismiss();
 			alert = "";
+			// }
 
-		}
-
-		private void addreceive(final String sender, final String body, final long date) {
-			ContentValues values = new ContentValues();
-			String to = sender;
-			values.put("address", to);
-			values.put("body", body);
-			values.put("type", 1);
-			values.put("read", 0);
-			values.put("seen", 0);
-			values.put("date", date);
-
-			ConversationListActivity.this.getContentResolver().insert(Uri.parse("content://sms"),
-					values);
 		}
 
 		private int parseMS(final String c) {
-			Log.d("SMS", c);
+			// Log.d("SMS", c);
 			String[] s = c.split("<msg ");
 			for (int n = 1; n < s.length; n++) {
 				String msg = s[n].substring(0, s[n].indexOf("/msg"));
@@ -795,7 +799,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 					e.printStackTrace();
 				}
 				long dateInLong = date.getTime();
-				this.addreceive(msg_num, msg_text, dateInLong);
+				ConversationListActivity.this.addreceive(msg_num, msg_text, dateInLong);
 			}
 			// createFakeSms(context,"+399991234567");
 			return s.length;
@@ -808,6 +812,20 @@ public final class ConversationListActivity extends SherlockActivity implements
 		editor.putString("passw", captcha2);
 		editor.commit();
 
+	}
+
+	private void addreceive(final String sender, final String body, final long date) {
+		ContentValues values = new ContentValues();
+		String to = sender;
+		values.put("address", to);
+		values.put("body", body);
+		values.put("type", 1);
+		values.put("read", 0);
+		values.put("seen", 0);
+		values.put("date", date);
+
+		ConversationListActivity.this.getContentResolver().insert(Uri.parse("content://sms"),
+				values);
 	}
 
 }
