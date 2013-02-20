@@ -15,6 +15,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -52,6 +53,8 @@ public class Dialog {
 				e.printStackTrace();
 			}
 			captcha = (EditText) layout.findViewById(R.id.text);
+			CheckBox cb = (CheckBox) layout.findViewById(R.id.checkBox1);
+			cb.setVisibility(View.GONE);
 			DisplayMetrics metrics = new DisplayMetrics();
 			context.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 			// Log.d("misure",

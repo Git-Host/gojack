@@ -17,12 +17,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="it.ciopper90.gojack2"
     android:installLocation="internalOnly"
-    android:versionCode="7140002"
-    android:versionName="2.0.4" >
+    android:versionCode="1"
+    android:versionName="2.0.0" >
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="15" />
+        android:targetSdkVersion="17" />
 
     <supports-screens
         android:anyDensity="true"

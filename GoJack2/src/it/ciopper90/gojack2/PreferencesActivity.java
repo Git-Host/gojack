@@ -92,6 +92,7 @@ public class PreferencesActivity extends PreferenceActivity implements IPreferen
 	/** Theme: black. */
 	private static final String THEME_BLACK = "black";
 	/** Theme: light. */
+	@SuppressWarnings("unused")
 	private static final String THEME_LIGHT = "light";
 	/** Preference's name: text size. */
 	private static final String PREFS_TEXTSIZE = "textsizen";
@@ -265,6 +266,7 @@ public class PreferencesActivity extends PreferenceActivity implements IPreferen
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public final void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

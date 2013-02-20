@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
 
+@SuppressWarnings("deprecation")
 public class AmbilWarnaDialog {
 	private static final String TAG = AmbilWarnaDialog.class.getSimpleName();
 
@@ -170,7 +171,6 @@ public class AmbilWarnaDialog {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	protected void letakkanPanah() {
 		float y = this.ukuranUiPx - (this.hue * this.ukuranUiPx / 360.f);
 		if (y == this.ukuranUiPx) {
@@ -183,7 +183,6 @@ public class AmbilWarnaDialog {
 		this.panah.setLayoutParams(layoutParams);
 	}
 
-	@SuppressWarnings("deprecation")
 	protected void letakkanKeker() {
 		float x = this.sat * this.ukuranUiPx;
 		float y = (1.f - this.val) * this.ukuranUiPx;

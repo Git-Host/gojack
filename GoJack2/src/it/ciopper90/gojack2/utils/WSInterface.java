@@ -46,7 +46,7 @@ public class WSInterface {
 		int pos = 0;
 		String serv = ws.ServizioNumero(number);
 		if (serv != null) {
-			int a = lista.indexOf(serv);
+			// int a = lista.indexOf(serv);
 			pos = lista.indexOf(serv);
 		}
 		if (pos == -1) {
