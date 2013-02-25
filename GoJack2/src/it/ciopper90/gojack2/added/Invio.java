@@ -34,7 +34,8 @@ public class Invio {
 		httpclient = new DefaultHttpClient(httpParameters);
 	}
 
-	public static String aggiorna(final String url) {
+	public static String aggiorna(final String urla) {
+		String url = control(urla);
 		try {
 			HttpParams httpParameters = new BasicHttpParams();
 			int timeoutConnection = 200000;
@@ -61,7 +62,13 @@ public class Invio {
 		return "Aggiornamento non riuscito";
 	}
 
-	public static byte[] scarica(final String url) {
+	private static String control(String urla) {
+		urla = urla.replace(" ", "%20");
+		return urla;
+	}
+
+	public static byte[] scarica(final String urla) {
+		String url = control(urla);
 		try {
 			HttpParams httpParameters = new BasicHttpParams();
 			int timeoutConnection = 200000;
@@ -91,6 +98,8 @@ public class Invio {
 	public String InvioSms(final Servizio s, final String number, final String testo) {
 		// Create a new HttpClient and Post Header
 		String url = s.getUrl();
+		url = control(url);
+
 		// url.replaceAll(, substitute)
 
 		this.httppost = new HttpPost(url);
@@ -145,6 +154,8 @@ public class Invio {
 		// Create a new HttpClient and Post Header
 		@SuppressWarnings("unused")
 		String url = s.getUrl();
+		url = control(url);
+
 		try {
 
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);

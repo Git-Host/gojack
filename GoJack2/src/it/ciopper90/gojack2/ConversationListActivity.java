@@ -498,7 +498,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 		AlertDialog.Builder builder;
 		LayoutInflater inflater = (LayoutInflater) this.context
 				.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.dialog,
+		View layout = inflater.inflate(R.layout.dialog_password,
 				(ViewGroup) this.findViewById(R.id.layout_root));
 		final EditText text_1 = (EditText) layout.findViewById(R.id.text);
 		final CheckBox b = (CheckBox) layout.findViewById(R.id.checkBox1);
@@ -763,17 +763,16 @@ public final class ConversationListActivity extends SherlockActivity implements
 			Toast.makeText(ConversationListActivity.this.context, result, Toast.LENGTH_SHORT)
 					.show();
 
-			// if (!ConversationListActivity.this.prefs.getString("wap",
-			// "").equals("")) {
-			// new DownFreeTask().execute();
-			// alert = "Import";
-			// ConversationListActivity.pd.setTitle("Download Free+");
-			// servizio = "free";
-			// } else {
-			// chiudo la progress dialog
-			ConversationListActivity.pd.dismiss();
-			alert = "";
-			// }
+			if (!ConversationListActivity.this.prefs.getString("wap", "").equals("")) {
+				new DownFreeTask().execute();
+				alert = "Import";
+				ConversationListActivity.pd.setTitle("Download Free+");
+				servizio = "free";
+			} else {
+				// chiudo la progress dialog
+				ConversationListActivity.pd.dismiss();
+				alert = "";
+			}
 
 		}
 
@@ -781,7 +780,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 			// Log.d("SMS", c);
 			String[] s = c.split("<msg ");
 			for (int n = 1; n < s.length; n++) {
-				String msg = s[n].substring(0, s[n].indexOf("/msg"));
+				String msg = s[n].substring(0, s[n].indexOf("msg>"));
 				String msg_num = msg.substring(msg.indexOf("sender=\"") + 8,
 						msg.indexOf("\"", msg.indexOf("sender=\"") + 9));
 				String msg_hour = msg.substring(msg.indexOf("hour=\"") + 6,
@@ -789,7 +788,7 @@ public final class ConversationListActivity extends SherlockActivity implements
 				String msg_date = msg.substring(msg.indexOf("date=\"") + 6,
 						msg.indexOf("\"", msg.indexOf("date=\"") + 7));
 				msg_date = msg_date.substring(0, 6) + "20" + msg_date.substring(6);
-				String msg_text = msg.substring(msg.indexOf("\">") + 2, msg.indexOf("<"));
+				String msg_text = msg.substring(msg.indexOf("\">") + 2, msg.indexOf("</"));
 				SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 				Date date = null;
 				try {
@@ -812,6 +811,107 @@ public final class ConversationListActivity extends SherlockActivity implements
 		editor.putString("passw", captcha2);
 		editor.commit();
 
+	}
+
+	private class DownFreeTask extends AsyncTask<String, String, String> {
+
+		private String text;
+
+		@Override
+		protected String doInBackground(final String... params) {
+			// result = null;
+			String wap = ConversationListActivity.this.prefs.getString("wap", "");
+			this.text = "http://wap.freesmee.com/" + wap + "?queue=1";
+			// interrogazione del web service
+
+			// aggiorno la progress dialog
+			this.publishProgress("Download");
+			// InputStream is = null;
+			byte[] a = Invio.scarica(this.text);
+			this.publishProgress("Extract");
+			if (a != null) {
+
+				String c = new String(a);
+				this.publishProgress("Import");
+				int res = this.parseFREE(c);
+				// this.aggiornalist();
+				if (res != 1) {
+					return "Scaricati " + (res - 1) + " Free+";
+				} else if (res == -1) {
+					return "Errore File GoJack.php";
+				} else {
+					return "Nessun Nuovo Free+";
+				}
+				// Toast.makeText(getApplicationContext(),
+				// "Servizi Inseriti Correttamente",
+				// Toast.LENGTH_LONG).show();
+			} else {
+				return "Errore Rete";
+				// Toast.makeText(getApplicationContext(), "Errore Rete",
+				// Toast.LENGTH_LONG).show();
+			}
+		}
+
+		@Override
+		protected void onProgressUpdate(final String... values) {
+			// aggiorno la progress dialog
+			ConversationListActivity.pd.setMessage(values[0]);
+			alert = values[0];
+		}
+
+		@Override
+		protected void onPostExecute(final String result) {
+			// chiudo la progress dialog
+			ConversationListActivity.pd.dismiss();
+
+			Vibrator v = (Vibrator) ConversationListActivity.this
+					.getSystemService(Context.VIBRATOR_SERVICE);
+
+			// Attiva la vibrazione per 1 secondo
+			v.vibrate(500);
+
+			/*
+			 * try { Thread.sleep(1000); } catch (InterruptedException e) { //
+			 * TODO Auto-generated catch block e.printStackTrace(); }
+			 * deletesms(context,"+3999912345670");
+			 */// operazioni di chiusura
+			Toast.makeText(ConversationListActivity.this.context, result, Toast.LENGTH_SHORT)
+					.show();
+			alert = "";
+
+		}
+
+		private int parseFREE(final String c) {
+			// Log.d("SMS", c);
+			// <p><em>18-02-2013 20:21</em> <strong>alberto</strong><br
+			// /><span>ciao</span></p>
+
+			String[] s = c.split("<p><e");
+			for (int n = 1; n < s.length; n++) {
+				String msg = s[n].substring(0, s[n].indexOf("an></p>"));
+				String msg_num = msg.substring(msg.indexOf("<strong>") + 8,
+						msg.indexOf("<", msg.indexOf("<strong>") + 4));
+				msg_num = msg_num.replace(".", "");
+				// msg_num=msg_num.replaceAll(" ", "");
+				String msg_date = msg.substring(msg.indexOf("m>") + 2,
+						msg.indexOf("<", msg.indexOf("m>") + 3));
+				// msg_date = msg_date.substring(0, 6) + "20" +
+				// msg_date.substring(6);
+				String msg_text = msg.substring(msg.indexOf("<span>") + 6, msg.indexOf("</sp"));
+				SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+				Date date = null;
+				try {
+					date = formatter.parse(msg_date);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				long dateInLong = date.getTime();
+				ConversationListActivity.this.addreceive(msg_num, msg_text, dateInLong);
+			}
+			// createFakeSms(context,"+399991234567");
+			return s.length;
+		}
 	}
 
 	private void addreceive(final String sender, final String body, final long date) {

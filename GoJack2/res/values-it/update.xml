@@ -19,6 +19,7 @@
 	-->
 <resources>
 	<string-array name="updates">
+	    <item>V 2.0.1: Corretto problema visualizzazione testo bianco su sfondo bianco nell\'inserimento della password, Corretto problema estrazione testo GoJackMS, Impostati i campi dell\'inserimento della password di tipo \'Password\', Corretto problema spazi nella passsword</item>
 		<item>V 2.0.0: Cambio interfaccia grafica grazie al software SMSDROID, Salvataggio ultimo servizio usato in ogni conversazione, Eliminati spazi automaticamente dall’url del file php, Inserimento automatico password durante il download dei servizi, Aggiunta segnalazione in caso di url errato, Inseriti link riguardanti GoJack nelle impostazioni del programma, Inserita e-mail per contattarmi in caso di problemi, Inserito url che porta al codice del programma su Google Code con annessa segnalazione degli errori, Inserito il bottone che permette il download dei GoJackMS (in alto vicino a \'nuovo messaggio\'), Possibilità di salvare la password per il download dei GoJackMS, Possibilità di modificare la password tramite il menu \'impostazioni gojack\'</item>
 	</string-array>
 </resources>

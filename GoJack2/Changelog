@@ -1,3 +1,9 @@
+V 2.0.6
+corretto problema visualizzazione testo bianco su sfondo bianco
+corretto problema download gojackms
+corretto problema protezione password
+corretto problema spazi nella passsword
+
 V 2.0.5
 correzione piccoli bug riguardanti il download dei gojackms su android >4
 correzione di un errore che riguardava la rotazione dello schermo durante l'invio di un messaggio su android >4
