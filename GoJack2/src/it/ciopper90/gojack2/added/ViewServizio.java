@@ -398,7 +398,7 @@ public class ViewServizio extends Activity {
 		AlertDialog.Builder builder;
 		LayoutInflater inflater = (LayoutInflater) ViewServizio.this
 				.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.dialog,
+		View layout = inflater.inflate(R.layout.dialog_password,
 				(ViewGroup) this.findViewById(R.id.layout_root));
 		this.text_1 = (EditText) layout.findViewById(R.id.text);
 		CheckBox cb = (CheckBox) layout.findViewById(R.id.checkBox1);
