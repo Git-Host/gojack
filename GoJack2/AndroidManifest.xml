@@ -18,7 +18,7 @@
     package="it.ciopper90.gojack2"
     android:installLocation="internalOnly"
     android:versionCode="1"
-    android:versionName="2.0.1" >
+    android:versionName="2.0.2" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -50,7 +50,7 @@
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.WRITE_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.premission.SEND_SMS"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />

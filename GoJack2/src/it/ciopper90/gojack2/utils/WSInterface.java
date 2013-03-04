@@ -30,6 +30,24 @@ public class WSInterface {
 		return spinner;
 	}
 
+	public static Spinner setSpinner(final Spinner spinner, final Context context) {
+		Spinner s = spinner;
+		ws = new WorkServizio(context);
+		service = ws.caricaServizio();
+		ArrayList<String> lista = new ArrayList<String>();
+		for (int i = 0; i < service.size(); i++) {
+			lista.add(service.get(i).getName());
+		}
+		// spinneradapter=
+		// ArrayAdapter.createFromResource(context.getActionBar().getThemedContext(),
+		// lista,
+		// );
+
+		spinneradapter = new ArrayAdapter<String>(context, R.layout.textview, lista);
+		s.setAdapter(spinneradapter);
+		return s;
+	}
+
 	public static void saveService(final String to, final String selectedItem) {
 		ws.saveService(to, selectedItem);
 	}
