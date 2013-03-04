@@ -175,6 +175,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 	// private SpinnerAdapter spinneradapter;
 	private static SendSMS send;
 	private static String alert;
+	private static String number;
 
 	/**
 	 * Get {@link ListView}.
@@ -372,7 +373,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 
 		String displayName = contact.getDisplayName();
 		this.setTitle(displayName);
-		String number = contact.getNumber();
+		number = contact.getNumber();
 		if (displayName.equals(number)) {
 			this.getSupportActionBar().setSubtitle(null);
 			number = contact.getDisplayName();
@@ -383,7 +384,7 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		// this.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		this.getSupportActionBar().setDisplayShowHomeEnabled(false);
 
-		this.spinner = WSInterface.setSpinner(this);
+		// this.spinner = WSInterface.setSpinner(this);
 		if (MessageListActivity.alert == null) {
 			MessageListActivity.alert = "";
 		}
@@ -404,18 +405,15 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		// this.spinneradapter = new ArrayAdapter<String>(this,
 		// R.layout.textview, lista);
 		// this.spinner.setAdapter(this.spinneradapter);
-		if (number.contains(" ")) {
-			number = number.replace(" ", "");
-		}
-		this.spinner.setSelection(WSInterface.PositionServizioNumero(number));
+
 		// String serv = WSInterface.ServizioNumero(number);
 		// if (serv != null) {
 		// int a = lista.indexOf(serv);
 		// lista.indexOf(serv));
 		// }
 		// TODO attach to an adapter of some sort
-		this.getSupportActionBar().setCustomView(this.spinner);
-		this.getSupportActionBar().setDisplayShowCustomEnabled(true);
+		// this.getSupportActionBar().setCustomView(this.spinner);
+		// this.getSupportActionBar().setDisplayShowCustomEnabled(true);
 		// this.setContactIcon(contact);
 
 		if (MessageListActivity.alert.equals("captcha")) {
@@ -581,6 +579,12 @@ public class MessageListActivity extends SherlockActivity implements OnItemClick
 		// this.contactItem = menu.findItem(R.id.item_service);
 		// this.spinner = (Spinner)
 		// this.contactItem.getActionView().findViewById(R.id.item_service);
+		this.spinner = (Spinner) menu.findItem(R.id.menuSort).getActionView();
+		this.spinner = WSInterface.setSpinner(this.spinner, this);
+		if (number.contains(" ")) {
+			number = number.replace(" ", "");
+		}
+		this.spinner.setSelection(WSInterface.PositionServizioNumero(number));
 
 		if (this.conv != null) {
 			this.setContactIcon(this.conv.getContact());

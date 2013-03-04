@@ -155,10 +155,10 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 		// aggiunge spinner alla ActionBar
 
 		// this.spinner.setAdapter(WSInterface.setSpinner(this));
-		this.spinner = WSInterface.setSpinner(this);
+		// this.spinner = WSInterface.setSpinner(this);
 
-		this.getSupportActionBar().setCustomView(this.spinner);
-		this.getSupportActionBar().setDisplayShowCustomEnabled(true);
+		// this.getSupportActionBar().setCustomView(this.spinner);
+		// this.getSupportActionBar().setDisplayShowCustomEnabled(true);
 
 		if (SenderActivity.alert.equals("captcha")) {
 			this.captcha();// Dialog.RestoreDialog(this, this.alert);
@@ -264,6 +264,17 @@ public final class SenderActivity extends SherlockActivity implements OnClickLis
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		this.getSupportMenuInflater().inflate(R.menu.sender, menu);
+		this.spinner = (Spinner) menu.findItem(R.id.menuSort).getActionView();
+		this.spinner = WSInterface.setSpinner(this.spinner, this);
+		// Spinner s = (Spinner)
+		// menu.findItem(R.id.my_menu_spinner).getActionView(); // find the
+		// spinner
+		// SpinnerAdapter mSpinnerAdapter =
+		// create the adapter
+		// from a StringArray
+		// s.setAdapter(mSpinnerAdapter); // set the adapter
+		// s.setOnItemSelectedListener(myChangeListener);
+
 		return true;
 	}
 
