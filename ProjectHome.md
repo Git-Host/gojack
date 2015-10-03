@@ -1,0 +1,1 @@
+semplice programma per l'invio di sms tramite i vari siti web
